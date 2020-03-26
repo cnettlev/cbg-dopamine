@@ -1,0 +1,25 @@
+<html>
+  <head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+  </head>
+   <body>
+     <button type='button' id ='retrieve'>Submit</button>
+     <img src="" id="myimg" />
+   </body>
+  <script>
+    $(document).ready(function() {
+       $('#retrieve').click(function(){
+           $.ajax({
+           url: "{{ url_for ('get_img') }}",
+           type: "GET",
+           success: function(response) {
+               $("#myimg").attr('src', '/static/' + response);
+          },
+          error: function(xhr) {
+            //Do Something to handle error
+         }
+         });
+       });
+    });
+  </script>
+</html>

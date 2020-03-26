@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Pasquereau-et-al-2007</title>
+    <script src="https://chemwriter.com/sdk/chemwriter.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://chemwriter.com/sdk/chemwriter.css">
+    <link rel="icon" 
+          type="image/ico" 
+          href="/static/favicon.ico" />
+  </head>
+   <body>
+
+     <form method="POST" action="set-trial">
+      <div class="form-group" align="center">
+          <input type="text" name="user"><br><br>
+          <input type="submit" value="Jugar!" class="btn-primary" />
+      </div>
+    </form>
+    <!-- <button type='button' id ='play'>Jugar!</button>-->
+   </body>
+  <script>
+    $(document).ready(function() {
+       $('#play').click(function(){
+           $.ajax({
+           url: "{{ url_for ('startTrial') }}?user="+document.getElementById("fname").value,
+           type: "GET",
+           success: function(response) {
+          },
+          error: function(xhr) {
+            //Do Something to handle error
+         }
+         });
+       });
+    });
+  </script>
+</html>
