@@ -21,8 +21,9 @@
     .data { font-size: 180%; }
   </style>
   <body>
+    <br><br><br>
     <div class="page">
-      <h1>Elige {{ user }} :)</h1>
+      <h1>Elige {{ user }} :)  <br> Juego {{ trial }}</h1>
       <table>
         <tbody>
           <tr> <!-- ROW 1 -->
@@ -58,8 +59,8 @@
             </td>
             <td>
               <div class="cell">
-                <div class="image"><input type="image" src="/static/0reward.png" id ='reward' style="display:none" ></div>
-                <div class="image"><input type="image" src="/static/0no-reward.png" id ='no-reward' style="display:none" ></div>
+                <div class="image"><input type="image" src="/static/reward.png" id ='reward' style="display:none" ></div>
+                <div class="image"><input type="image" src="/static/no-reward.png" id ='no-reward' style="display:none" ></div>
               </div>
             </td>
             <td>
@@ -98,53 +99,67 @@
   </body>
     <script>
 
+    var tout;
+
     $(document).ready(function() {
 
        $('#cuea').click(function(){
-           $.ajax({
-           url: "{{ url_for ('select') }}?selected={{ pos_a }}&time="+performance.now(),
-           type: "GET",
-           success: function(response) {
-               if(response==1) {
-                 document.getElementById('reward').style.display = 'block';
-              }
-              else {
-                 document.getElementById('no-reward').style.display = 'block';
-              }
-             document.getElementById('reward').style.display = 'block';
-          },
-          error: function(xhr) {
-            //Do Something to handle error
-         }
-         });
+        var r = document.getElementById("reward");
+        var nr = document.getElementById("no-reward");
+        if(window.getComputedStyle(r).display === "none" && window.getComputedStyle(nr).display === "none") {
+          clearTimeout(tout)
+             $.ajax({
+             url: "{{ url_for ('select') }}?selected={{ pos_a }}&time="+performance.now(),
+             type: "GET",
+             success: function(response) {
+                console.log("response: ");
+                console.log(response);
+                 if(response==1) {
+                  r.style.display = 'block';
+                }
+                else if (response==0) {
+                   nr.style.display = 'block';
+                }
+            },
+            error: function(xhr) {
+              //Do Something to handle error
+           }
+           });
 
-          setTimeout(function(){
-            location.reload();
-          },1000);
+            setTimeout(function(){
+              location.reload();
+            },1000);
+        }
        });
 
 
        $('#cueb').click(function(){
-           $.ajax({
-           url: "{{ url_for ('select') }}?selected={{ pos_b }}&time="+performance.now(),
-           type: "GET",
-           success: function(response) {
-               if(response==1) {
-                document.getElementById('reward').style.display = 'block';
-              }
-              else {
-                 document.getElementById('no-reward').style.display = 'block';
-              }
-              document.getElementById('reward').style.display = 'block';
-          },
-          error: function(xhr) {
-            //Do Something to handle error
-         }
-         });
+        var r = document.getElementById("reward");
+        var nr = document.getElementById("no-reward");
+        if(window.getComputedStyle(r).display === "none" && window.getComputedStyle(nr).display === "none") {
+          clearTimeout(tout)
+             $.ajax({
+             url: "{{ url_for ('select') }}?selected={{ pos_b }}&time="+performance.now(),
+             type: "GET",
+             success: function(response) {
+                console.log("response: ");
+                console.log(response);
+                 if(response==1) {
+                  r.style.display = 'block';
+                }
+                else if (response==0) {
+                   nr.style.display = 'block';
+                }
+            },
+            error: function(xhr) {
+              //Do Something to handle error
+           }
+           });
 
-          setTimeout(function(){
-            location.reload();
-          },1000);
+            setTimeout(function(){
+              location.reload();
+            },1000);
+         }
        });
     });
 
@@ -159,8 +174,8 @@
         document.getElementById('cueb').style.display = 'none';
     },3500);
 
-    setTimeout(function(){
-      location.reload();
-    },4000);
+    tout = setTimeout(function(){
+            location.reload();
+          },4000);
   </script>
 </html>

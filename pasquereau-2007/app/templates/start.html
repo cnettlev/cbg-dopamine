@@ -9,29 +9,46 @@
           type="image/ico" 
           href="/static/favicon.ico" />
   </head>
-   <body>
+  <style>
+  ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+  }
 
+  li {
+    float: left;
+  }
+
+  li a {
+    display: block;
+    color: white;
+    text-align: center;
+    padding: 16px;
+    text-decoration: none;
+  }
+  </style>
+   <body>
      <form method="POST" action="set-trial">
       <div class="form-group" align="center">
-          <input type="text" name="user"><br><br>
-          <input type="submit" value="Jugar!" class="btn-primary" />
+           <img class="center" src="/static/icon.jpg">
+           <br><br>
+           <br><br>
+          <input type="text" onClick="this.select();" name="user" value="Nombre" style="font-size:60px" ><br><br>
+          <input type="text" onClick="this.select();" name="yold" value="Edad" style="font-size:60px" ><br><br>
+          <input type="submit" value="Jugar!" class="btn-primary" style="font-size:70px"/>
       </div>
     </form>
+    <br><br>
+
+    <ul  style="list-style-type:none">
+    {% for cue in cues %}
+    <li><img style="width: 5px; height: 5px" src="/static/{{ cue }}"></li>
+    {% endfor %}
+    <li><img style="width: 5px; height: 5px" src="/static/reward.png"></li>
+    <li><img style="width: 5px; height: 5px" src="/static/no-reward.png"></li>
+    </ul>
     <!-- <button type='button' id ='play'>Jugar!</button>-->
    </body>
-  <script>
-    $(document).ready(function() {
-       $('#play').click(function(){
-           $.ajax({
-           url: "{{ url_for ('startTrial') }}?user="+document.getElementById("fname").value,
-           type: "GET",
-           success: function(response) {
-          },
-          error: function(xhr) {
-            //Do Something to handle error
-         }
-         });
-       });
-    });
-  </script>
 </html>
