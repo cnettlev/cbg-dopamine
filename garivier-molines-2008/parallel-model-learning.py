@@ -13,7 +13,7 @@ parallelDivisions = False
 plotNeuralData = True
 
 firstDynamic = False
-DA_DIV = np.array([8.0,6.0,4.0]) # np.array([6.0,4.0,6.0,8.0]) #np.arange(0.0,2.6,0.5)
+DA_DIV = np.array([4.0]) # np.array([6.0,4.0,6.0,8.0]) #np.arange(0.0,2.6,0.5)
 DIVISIONS = DA_DIV.shape[0]
 TIMES = 5
 baseNumber = 0 
@@ -82,7 +82,7 @@ def addPlotting(processes):
     processes = createList(processes)
     output = []
     for p in processes:
-        output.append(p + ' --flashPlots 10 --storePlots 10')
+        output.append(p + ' --flashPlots 50 --storePlots 50')
     return output
 
 # def runParalelProcess(processes):

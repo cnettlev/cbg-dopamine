@@ -6,7 +6,7 @@ import sys
 import numpy as np
 from time import sleep
 
-additionalOptions = ' -t 200 -b 12 -r 100 --ltd-constant --correlatedNoise -S --relativeValue' # Increase the trials to 600, disable learning, use regular patterns -r100 --dynamicDA 
+additionalOptions = ' -t 90 -b 12 -r 100 --ltd-constant --correlatedNoise --relativeValue ' # Increase the trials to 600, disable learning, use regular patterns -r100 --dynamicDA 
 
 parallelDivisions = False 
 
@@ -30,9 +30,9 @@ cLTD = None # np.array([0.0001,0.00005,0.00001])
 ltdStep = 0.0000005
 ltpStep = 0.00002
 (ltdMin,ltdMax) = (0.0000015,0.000005)
-LTD = np.arange(0.000005-2*ltdStep,0.000005+4*ltdStep,ltdStep) # np.array([0.000005]) #
-LTP = np.arange(0.00007,0.00007+4*ltpStep,ltpStep) # np.array([0.00003])#[0.0000375,0.00005,0.0000625,0.000075])
-LTP = np.append(LTP,0.0005)
+LTD = np.array([0.0000065])# np.arange(0.000005-2*ltdStep,0.000005+4*ltdStep,ltdStep) # np.array([0.000005]) #
+LTP = np.array([0.00009])#np.arange(0.00007,0.00007+4*ltpStep,ltpStep) # np.array([0.00003])#[0.0000375,0.00005,0.0000625,0.000075])
+#LTP = np.append(LTP,0.0005)
 STDP_factor = 1
 
 STDP = np.zeros((len(LTD)*len(LTP),2))
@@ -82,7 +82,7 @@ def addPlotting(processes):
     processes = createList(processes)
     output = []
     for p in processes:
-        output.append(p + ' --flashPlots 10 --storePlots 10')
+        output.append(p + ' --flashPlots 5 --storePlots 10')
     return output
 
 # def runParalelProcess(processes):
