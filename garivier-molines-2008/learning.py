@@ -58,9 +58,6 @@ matplotlib.rcParams.update(
 
 #import sys                          # Added to use command line arguments
 from datetime import datetime       # Added to create a store file with time data
-from socket import gethostname      # Added to specify different output folders
-                                    # deppending on the computer where the code is
-                                    # running
 from learningOptions import *       # Added argument options parser
 import csv
 from collections import OrderedDict

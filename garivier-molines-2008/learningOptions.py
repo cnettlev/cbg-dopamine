@@ -1,6 +1,9 @@
 from optparse import OptionParser
 import numpy as np
 import os
+from socket import gethostname      # Added to specify different output folders
+                                    # deppending on the computer where the code is
+                                    # running
 
 usage = "usage: %prog [option_1 [arg_option_1] option_2 [arg_option_2] ...]"
 parser = OptionParser(usage=usage)
