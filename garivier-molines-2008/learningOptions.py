@@ -132,13 +132,14 @@ aux_Y = options.parY
 
 if options.GM2008:
   n = 3
-  nbTrials = 900 #9000
-  invertAt = [300,500] #[3000,5000]
+  nbTrials = 1000 #9000
+  invertAt = [3000,5000] #[3000,5000]
 
 
+file_base =  'gDA_'+str(SNc_N)
 if folder:
     file_base = folder+file_base
-    
+
 STORE_FAILED = False
 FAILED_FILE = folder+'failed_'+str(DA)
 
