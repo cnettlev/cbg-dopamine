@@ -19,7 +19,7 @@ parser.add_option("-n", "--ncues", dest="n", default=4, type="int",
                   help="Number of cues to be presented. (Int)", metavar="nCues")
 parser.add_option("-f", "--file", dest="nFile", default="000",
                   help="Index number to be included in a storing data file. (String)")
-parser.add_option("-F", "--folder", dest="folder", default='', metavar='Path',
+parser.add_option("-F", "--folder", dest="folder", default='Exp', metavar='Path',
                   help="Folder destination for the storing data file. (String)")
 parser.add_option("--flashPlots", dest="fPlots", default=-1, type="int", metavar="FPLOTS",
                   help="Activates plotting if not, plotting every FPLOTS trials. A zero value means online plotting every trial. Deactivated by negative values.")
@@ -134,3 +134,23 @@ if options.GM2008:
   n = 3
   nbTrials = 900 #9000
   invertAt = [300,500] #[3000,5000]
+
+
+if folder:
+    file_base = folder+file_base
+    
+STORE_FAILED = False
+FAILED_FILE = folder+'failed_'+str(DA)
+
+if STORE_DATA or STORE_FAILED:
+    
+    if 'corcovado' == gethostname():
+        if not folder:
+            filename = '/mnt/Data/Cristobal/tonicDA_effects/connections/Exp/'+file_base+'__'+datetime.now().strftime("%Y%m%d")+'_'+nFile
+        else:
+            filename = file_base+str(DA)+'_'+str(alpha_LTP)+'_'+str(alpha_LTD)+'_'+nFile
+    else:
+        if not folder:
+            filename = './Exp/'+file_base+str(DA)+'__'+datetime.now().strftime("%Y%m%d")+'_'+nFile
+        else:
+            filename = file_base+'_'+str(alpha_LTP)+'_'+str(alpha_LTD)+'_'+str(DA)+'_'+nFile

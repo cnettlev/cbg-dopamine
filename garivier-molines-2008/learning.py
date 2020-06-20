@@ -163,8 +163,8 @@ reward_ext = 50 * millisecond + delayReward
 # Data saving configuration
 avoidUnsavedPlots = True
 # STORE_DATA = True
-STORE_FAILED = False
-FAILED_FILE = folder+'failed_'+str(DA)
+# STORE_FAILED = False
+# FAILED_FILE = folder+'failed_'+str(DA)
 
 N = range(n)
 file_base =  'gDA_'+str(SNc_N)
@@ -176,24 +176,6 @@ if dynamicDA:
     file_base += 'd_'
 if len(invertAt):
     file_base += 'r'+'-'.join([str(i) for i in invertAt])+'_'
-
-if folder:
-    file_base = folder+file_base
-
-if STORE_DATA or STORE_FAILED:
-    
-    if 'corcovado' == gethostname():
-        if not folder:
-            filename = '/mnt/Data/Cristobal/tonicDA_effects/connections/Exp/'+file_base+'__'+datetime.now().strftime("%Y%m%d")+'_'+nFile
-        else:
-            filename = file_base+str(DA)+'_'+str(alpha_LTP)+'_'+str(alpha_LTD)+'_'+nFile
-    elif 'lhotse' == gethostname():
-        if not folder:
-            filename = './Exp/'+file_base+str(DA)+'__'+datetime.now().strftime("%Y%m%d")+'_'+nFile
-        else:
-            filename = file_base+'_'+str(alpha_LTP)+'_'+str(alpha_LTD)+'_'+str(DA)+'_'+nFile
-    else:
-        filename = file_base+str(DA)+'_'+str(alpha_LTP)+'_'+str(alpha_LTD)+'_'+nFile
 
 if STORE_DATA:
     DATA = OrderedDict([('n',n),('DA',DA),('SNc',0),('P-buff',0),('choice',0),('nchoice',0),('motTime',0)]+[('weight_'+str(c),0) for c in N]+[('cogTime',0),

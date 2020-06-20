@@ -13,11 +13,11 @@ parallelDivisions = False
 plotNeuralData = True
 
 firstDynamic = True
-DA_DIV = np.array([4.0,6.0]) # np.array([6.0,4.0,6.0,8.0]) #np.arange(0.0,2.6,0.5)
+DA_DIV = np.array([5.0,4.0,5.0,6.0]) # np.array([6.0,4.0,6.0,8.0]) #np.arange(0.0,2.6,0.5)
 DIVISIONS = DA_DIV.shape[0]
-TIMES = 5
+TIMES = 500
 baseNumber = 0 
-NJOBS = 24
+NJOBS = 100
 WEIGHTS = None # np.array([["0.61414980 0.52987340 0.46941890 0.43399170","0.61561350 0.53347860 0.47005700 0.43940460","0.61691820 0.53227470 0.46791240 0.43998220","0.61740550 0.53296140 0.46909390 0.44151160","0.61779960 0.53731250 0.46666480 0.44043540","0.61750240 0.53647780 0.46687310 0.43947310"]])
 #STDP = np.array([[0.0000025,1.5*0.000075],[0.0000025,0.5*0.000075],[2*0.0000025,0.000075]])
 
@@ -30,7 +30,7 @@ cLTD = None # np.array([0.0001,0.00005,0.00001])
 ltdStep = 0.0000005
 ltpStep = 0.00002
 (ltdMin,ltdMax) = (0.0000015,0.000005)
-LTD = np.array([0.0000065])# np.arange(0.000005-2*ltdStep,0.000005+4*ltdStep,ltdStep) # np.array([0.000005]) #
+LTD = np.array([0.000004])# np.arange(0.000005-2*ltdStep,0.000005+4*ltdStep,ltdStep) # np.array([0.000005]) #
 LTP = np.array([0.00009])#np.arange(0.00007,0.00007+4*ltpStep,ltpStep) # np.array([0.00003])#[0.0000375,0.00005,0.0000625,0.000075])
 #LTP = np.append(LTP,0.0005)
 STDP_factor = 1
