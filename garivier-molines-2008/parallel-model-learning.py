@@ -10,7 +10,7 @@ additionalOptions = ' -g -t 200 -b 12 --ltd-constant --correlatedNoise -S --rela
 
 parallelDivisions = False 
 
-plotNeuralData = True
+plotNeuralData = False
 
 firstDynamic = True
 DA_DIV = np.array([5.0,4.0,5.0,6.0]) # np.array([6.0,4.0,6.0,8.0]) #np.arange(0.0,2.6,0.5)
