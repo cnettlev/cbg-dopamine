@@ -123,7 +123,7 @@ alpha_DA_arD2 = .1
 alpha_Rew_DA = 15 # [sp/s]
 # DA strenght on striatal inputs
 gamma_DAstrenght  = .5#.25
-gamma_DAbySuccess = 4 # [sp/s]
+gamma_DAbySuccess = 2 # [sp/s]
 alpha_SucessEMA   = .8
 gamma_DA_LTD      = 0.025 # (1+gamma_DA_LTD * DA) -> 1.8 (4.0) - 2.2 (6.0) - 2.6 (8.0)
 gamma_mGluR_LTD   = 0.01 # 60 * (1+DA) -> 60 * 5 - 60*9 -> 300-700

@@ -123,20 +123,20 @@ alpha_DA_arD2 = .1
 alpha_Rew_DA = 15 # [sp/s]
 # DA strenght on striatal inputs
 gamma_DAstrenght  = .5#.25
-gamma_DAbySuccess = 4 # [sp/s]
+gamma_DAbySuccess = 2 # [sp/s]
 alpha_SucessEMA   = .8
-gamma_DA_LTD      = 0.025 # (1+gamma_DA_LTD * DA) -> 1.8 (4.0) - 2.2 (6.0) - 2.6 (8.0)
+gamma_DA_LTD      = 0.025 # (1+gamma_DA_LTD * DA) -> 1.1 (4.0) - 1.15 (6.0) - 1.2 (8.0)
 gamma_mGluR_LTD   = 0.01 # 60 * (1+DA) -> 60 * 5 - 60*9 -> 300-700
 gamma_eCB1_LTD    = 0.1 # (1-20)
 
 # Noise level (%)
-Cortex_N        =   0.1   # * aux_X                # Cortex_N        =   0.3    # * aux_X
-Striatum_N      =   0.1   # * aux_X                # Striatum_N      =   0.1    # * aux_X
-Striatum_corr_N =   0.1    # * aux_Y                # Striatum_corr_N =   0.2    # * aux_Y
-STN_N           =   0.1   # * aux_X                # STN_N           =   0.1   # * aux_X
-GPi_N           =   0.2   # * (aux_X/2.0)          # GPi_N           =   0.3   # * (aux_X/2.0)
-Thalamus_N      =   0.1   # * aux_X                # Thalamus_N      =   0.1   # * aux_X
-SNc_N           =   0.1    # * aux_Y                # SNc_N           =   0.1    # * aux_Y
+Cortex_N        =   0.01   # * aux_X                # Cortex_N        =   0.3    # * aux_X
+Striatum_N      =   0.01   # * aux_X                # Striatum_N      =   0.1    # * aux_X
+Striatum_corr_N =   0.01    # * aux_Y                # Striatum_corr_N =   0.2    # * aux_Y
+STN_N           =   0.01   # * aux_X                # STN_N           =   0.1   # * aux_X
+GPi_N           =   0.03   # * (aux_X/2.0)          # GPi_N           =   0.3   # * (aux_X/2.0)
+Thalamus_N      =   0.01   # * aux_X                # Thalamus_N      =   0.1   # * aux_X
+SNc_N           =   0.01    # * aux_Y                # SNc_N           =   0.1    # * aux_Y
 # Cortex_N        =   0.01
 # Striatum_N      =   0.01
 # Striatum_corr_N =   0.1
@@ -166,6 +166,7 @@ avoidUnsavedPlots = True
 STORE_FAILED = False
 FAILED_FILE = folder+'failed_'+str(DA)
 
+N = range(n)
 file_base =  'gDA_'+str(SNc_N)
 if useCorrelatedNoise:
     file_base += 'c_'
@@ -195,9 +196,10 @@ if STORE_DATA or STORE_FAILED:
         filename = file_base+str(DA)+'_'+str(alpha_LTP)+'_'+str(alpha_LTD)+'_'+nFile
 
 if STORE_DATA:
-    DATA = OrderedDict([('SNc',0),('P-buff',0),('choice',0),('nchoice',0),('motTime',0),('weights',''),('cogTime',0),
-                        ('failedTrials',0),('persistence',0),('values',''),('P',0),('P-3',0),('R',0),('R-buff',0),
-                        ('P-3',0),('LTD-LTP',''),('A',0),('A-buff',0)])
+    DATA = OrderedDict([('n',n),('DA',DA),('SNc',0),('P-buff',0),('choice',0),('nchoice',0),('motTime',0)]+[('weight_'+str(c),0) for c in N]+[('cogTime',0),
+                        ('failedTrials',0),('persistence',0)]+[('value_'+str(c),0) for c in N]+[('P',0),('P-3',0),('R',0),('R-buff',0),
+                        ('P-3',0)]+[('ltd_dw_'+str(c),0) for c in N]+[('ltd_dwS_'+str(c),0) for c in N]+[('ltp_dw_'+str(c),0) for c in N]+
+                        [('ltp_dwS_'+str(c),0) for c in N]+[('A',0),('A-buff',0),('Regret',0),('cumRegret',0)])
     with open(filename,"w") as file:
         wtr = csv.DictWriter(file, DATA.keys(),delimiter=',')
         wtr.writeheader()
@@ -315,7 +317,7 @@ def resetPlot():
     pastW = np.copy(W._weights)
     # print cogWDiff
 
-    for p in range(n):
+    for p in N:
         if dw[p]>0:
             cogWDiff[p][2] = (cogWDiff[p][2]*(currentTrial)+dw[p])/(currentTrial+1)
             if cogWDiff[p][3] < dw[p]:
@@ -356,23 +358,34 @@ def positiveClip(V):
     return np.maximum(V, 0.0)
 
 def fillData():
-    DATA['SNc']          = SNc_dop['V']
-    DATA['P-buff']       = np.array(P[-perfBuff:]).mean()
-    DATA['choice']       = choice
-    DATA['nchoice']      = -1
-    DATA['motTime']      = motDecisionTime
-    DATA['weights']      = '\t'.join(['{:.5f}'.format(i) for i in W_cortex_cog_to_striatum_cog.weights.diagonal()])
-    DATA['cogTime']      = cogDecisionTime
-    DATA['failedTrials'] = failedTrials
-    DATA['persistence']  = 1 if np.max(Cortex_cog['V']) > 30 else 0
-    DATA['values']       = '\t'.join(['{:.5f}'.format(i) for i in cog_cues_value])
-    DATA['P']            = P[-1:][0]
-    DATA['P-3']          = np.array(P[-3:]).mean()
-    DATA['R']            = R[-1:][0]
-    DATA['R-buff']       = np.array(R[-perfBuff:]).mean()
-    DATA['LTD-LTP']      = '\t'.join(['{:.5f}'.format(float(i)) for i in trialLtdLtp.reshape((n*4,1))])
-    DATA['A']            = A[-1:][0]
-    DATA['A-buff']       = np.array(A[-perfBuff:]).mean()
+    global cumRegret
+
+    DATA['SNc']                     = SNc_dop['V'][0][0]
+    DATA['P-buff']                  = np.array(P[-perfBuff:]).mean()
+    DATA['choice']                  = choice
+    DATA['nchoice']                 = -1
+    DATA['motTime']                 = motDecisionTime
+    w = W_cortex_cog_to_striatum_cog.weights.diagonal()
+    for c in N:
+        DATA['weight_'+str(c)]      = w[c]
+    DATA['cogTime']                 = cogDecisionTime
+    DATA['failedTrials']            = failedTrials
+    DATA['persistence']             = 1 if np.max(Cortex_cog['V']) > 30 else 0
+    for c in N:
+        DATA['value_'+str(c)]       = cog_cues_value[c]
+    DATA['P']                       = P[-1:][0]
+    DATA['P-3']                     = np.array(P[-3:]).mean()
+    DATA['R']                       = R[-1:][0]
+    DATA['R-buff']                  = np.array(R[-perfBuff:]).mean()
+    for c in N:
+        DATA['ltd_dw_'+str(c)]             = trialLtdLtp[c,0]
+        DATA['ltd_dwS_'+str(c)]            = trialLtdLtp[c,1]
+        DATA['ltp_dw_'+str(c)]             = trialLtdLtp[c,2]
+        DATA['ltp_dwS_'+str(c)]            = trialLtdLtp[c,3]
+    DATA['A']                       = A[-1:][0]
+    DATA['A-buff']                  = np.array(A[-perfBuff:]).mean()
+    DATA['Regret']                  = Regret[-1:][0]
+    DATA['cumRegret']                  = cumRegret
 
 def printData():
     # if applyInMotorLoop:
@@ -401,7 +414,7 @@ def D2_IPSC_kernel(t,t_DelRew):
 def convolv_D2Kernel(t,currentValue,input):
     return currentValue + input * D2_IPSC_kernel(t,motDecisionTime/1000+arD2_lag)
 
-SNc_dop   = zeros((1,), """  D2_IPSC = - alpha_DA_arD2 * DAtoD2c;
+SNc_dop   = zeros((1,1), """  D2_IPSC = - alpha_DA_arD2 * DAtoD2c;
                              Ir = np.maximum(Irew, Ie_rew);
                              I = Ir + D2_IPSC;
                              n = correlatedNoise(I,n,SNc_N,alpha_Rew_DA,SNc_N_tau);
@@ -489,7 +502,7 @@ else:
     cog_cues_value = np.ones(n) * 0.5
 mot_cues_value = np.ones(n) * 0.5
 if options.GM2008:
-    cues_reward = np.array([0.5,0.3,0.3])
+    cues_reward = np.array([0.5,0.4,0.3])
 else:
     cues_reward = np.array([3.0,2.0,1.0,0.0])/3.0
 
@@ -683,7 +696,8 @@ def earlyStop(t):
 
 # Learning
 # -----------------------------------------------------------------------------
-P, R, A = [], [], []
+P, R, A, Regret = [], [], [], []
+cumRegret = 0
 smoothR = 0
 
 cogDecision = False
@@ -715,7 +729,7 @@ def corticostriatal_learning(t):
         else:
             return
 
-        for c in range(n):
+        for c in N:
             dw = dDA * alpha * Striatum_cog['V'][c][0] / ((reward_ext - delayReward)/millisecond)
             w = clip(W.weights[c, c] + dw, Wmin, Wmax)
             trialLtdLtp[c,2] += dw
@@ -724,7 +738,7 @@ def corticostriatal_learning(t):
 
         if applyInMotorLoop:
             W = W_cortex_mot_to_striatum_mot
-            for c in range(n):
+            for c in N:
                 dw = dDA * alpha * Striatum_mot['V'][0][c] / ((reward_ext - delayReward)/millisecond)
                 w = clip(W.weights[c, c] + dw, Wmin, Wmax)
                 W.weights[c,c] = w
@@ -734,7 +748,7 @@ def corticostriatal_learning(t):
 def corticostriatalLTD(t):
     if constantLTD:
         W = W_cortex_cog_to_striatum_cog
-        for pop in range(n):
+        for pop in N:
             # print pop,n
             # LTD is produced by the combined activation of postsynaptic mGluR and presynaptic endocannabinoid receptors (produced at the postynaptic neurons)
             # The endocannabinoid release is enhanced by D2 receptors -> DA promotes LTD
@@ -759,7 +773,7 @@ def corticostriatalLTD(t):
 
         if applyInMotorLoop:
             W = W_cortex_mot_to_striatum_mot
-            for pop in range(n):
+            for pop in N:
                 dw = - 0.001 * alpha_LTD * Striatum_mot['It'][0][pop] * (1 + gamma_DA_LTD * SNc_dop['V'])
                 w = clip(W.weights[pop][pop] + dw,Wmin,Wmax)
                 W.weights[pop][pop] = w
@@ -770,6 +784,7 @@ def register(t):
     global currentTrial, continuousFailedTrials, selectionError, cogDecision
     global cogDecisionTime, motDecision, motDecisionTime
     global choice, nchoice, mchoice, pError, smoothR, pastW, cog_cues_value
+    global cumRegret
     
     if not cogDecision:
         U = np.sort(Cortex_cog['V'].ravel())
@@ -823,8 +838,11 @@ def register(t):
         P.append(0.0)
 
     # How good was the selection compared to the best choice presented
+    regret = np.max(cues_reward) - cues_reward[choice]
     advantage = 1 + (cues_reward[choice] - np.max(cues_reward))
     A.append(advantage)
+    Regret.append(regret)
+    cumRegret += regret
 
     W = W_cortex_cog_to_striatum_cog
     Wm = W_cortex_mot_to_striatum_mot
@@ -899,7 +917,7 @@ if neuralPlot:
     nrData2 = 2*n
     nrData3 = 2*n
 
-    fig, ((axstr,axr1),(axctx,axr2),(axsnc,axr3),(axstr_is,axw),(axstr_th,axv)) = plt.subplots(5,2,figsize=(20,10),num="DA: "+str(DA))#+" X_"+str(aux_X)+" Y_"+str(aux_Y))
+    fig, ((axstr,axr1),(axctx,axr2),(axsnc,axr3),(axstr_is,axw),(axstr_th,axv)) = plt.subplots(5,2,figsize=(20,10),num="DA: "+str(DA)+" "+'% '.join(str(r) for r in cues_reward)+'% ')#+" X_"+str(aux_X)+" Y_"+str(aux_Y))
 
     axstr.set_ylim(-2,25)
     axstr.set_title('Cognitive striatal activity', fontsize=10)
@@ -972,13 +990,18 @@ if neuralPlot:
     plt.setp(neuralSignals5[n:], 'marker', 'D','linestyle','','alpha',0.2,'markersize',5)
     plt.setp(neuralSignals5[n], 'color','magenta')
 
-    for l in range(n):
+    for l in N:
         plt.setp(neuralSignals2[l+n],'color',plt.getp(neuralSignals2[l],'color'),'ls','--')
         plt.setp(neuralSignals[l+n],'color',plt.getp(neuralSignals[l],'color'),'ls','--')
         plt.setp(neuralSignalsr2[l+n],'color',plt.getp(neuralSignals[l],'color'),'ls','--')
         plt.setp(neuralSignalsr3[l+n],'color',plt.getp(neuralSignals[l],'color'),'ls','--')
         plt.setp(neuralSignals_str_is[l+n],'color',plt.getp(neuralSignals[l],'color'),'ls','--')
         plt.setp(neuralSignals_str_th[l+n],'color',plt.getp(neuralSignals[l],'color'),'ls','--')
+        plt.setp(neuralSignalsr1[l*n+l],'color',plt.getp(neuralSignals[l],'color'),'ls','--')
+        for l2 in N:
+            if l == l2:
+                continue
+            plt.setp(neuralSignalsr1[l+l2*n],'color',plt.getp(neuralSignals[l],'color'),'marker',(l2+3,1,0),'markersize',12)
     for l in range(2):
         plt.setp(neuralSignals3_2[l+1],'ls',':')
     
@@ -1013,7 +1036,7 @@ if neuralPlot:
             borderaxespad=0, frameon=False)
     axv.legend(flip(neuralSignals5,n),flip(['Vcog['+str(i)+']' for i in cues_cog]+['Selection'],n),loc='upper right', ncol=n, fontsize='x-small',framealpha=0.6, # bbox_to_anchor= (1.08, 0.5), # bbox_to_anchor= (1.15, 0.5), 
             borderaxespad=0, frameon=False)
-    axr1.legend(flip(neuralSignalsr1,n),flip(['Ass'+str(i)+'_'+str(j) for j in range(n) for i in range(n)],n),loc='upper right', fontsize='x-small', #bbox_to_anchor= (1.1, 0.5), 
+    axr1.legend(flip(neuralSignalsr1,n),flip(['Ass'+str(i)+'_'+str(j) for j in N for i in N],n),loc='upper right', fontsize='x-small', #bbox_to_anchor= (1.1, 0.5), 
         borderaxespad=0, frameon=False, ncol=n)
     axr2.legend(flip(neuralSignalsr2,n),flip(labels,n),loc='upper right', ncol=n, fontsize='x-small', # bbox_to_anchor= (1.08, 0.5), 
         borderaxespad=0, frameon=False)
@@ -1068,9 +1091,9 @@ if neuralPlot:
         if flashPlots>0 and (currentTrial % flashPlots) != 0:
             return
         index = int(round(t/plotSteps))
-        neuralData_y[index] = np.hstack(([Striatum_cog['V'][i][0] for i in range(n)],Striatum_mot['V'][0][:]))
+        neuralData_y[index] = np.hstack(([Striatum_cog['V'][i][0] for i in N],Striatum_mot['V'][0][:]))
         #neuralData_y[index][n:] = Striatum_mot['V'][0][:]
-        neuralData_y2[index] = np.hstack(([Cortex_cog['V'][i][0] for i in range(n)],Cortex_mot['V'][0][:]))
+        neuralData_y2[index] = np.hstack(([Cortex_cog['V'][i][0] for i in N],Cortex_mot['V'][0][:]))
         #neuralData_y2[index][n:] = Cortex_mot['V'][0][:]
         neuralData_y3[index][0] = SNc_dop['V']
         neuralData_y3[index][1] = -SNc_dop['SNc_h']
@@ -1078,12 +1101,12 @@ if neuralPlot:
         neuralData_y3_2[index][0] = SNc_dop['Ir']
         neuralData_y3_2[index][1] = SNc_dop['Irew']
         neuralData_y3_2[index][2] = SNc_dop['Ie_rew']
-        neuralData_y_str_is[index] = np.hstack(([Striatum_cog['Is'][i][0] for i in range(n)],Striatum_mot['Is'][0][:]))
-        neuralData_y_str_th[index] = np.hstack(([Striatum_cog['Vh'][i][0] for i in range(n)],Striatum_mot['Vh'][0][:]))
+        neuralData_y_str_is[index] = np.hstack(([Striatum_cog['Is'][i][0] for i in N],Striatum_mot['Is'][0][:]))
+        neuralData_y_str_th[index] = np.hstack(([Striatum_cog['Vh'][i][0] for i in N],Striatum_mot['Vh'][0][:]))
 
-        neuralData_yr1[index] = [Striatum_ass['V'][i][j] for j in range(n) for i in range(n)]
-        neuralData_yr2[index] = np.hstack(([GPi_cog['V'][i][0] for i in range(n)],GPi_mot['V'][0][:]))
-        neuralData_yr3[index] = np.hstack(([STN_cog['V'][i][0] for i in range(n)],STN_mot['V'][0][:]))
+        neuralData_yr1[index] = [Striatum_ass['V'][i][j] for j in N for i in N]
+        neuralData_yr2[index] = np.hstack(([GPi_cog['V'][i][0] for i in N],GPi_mot['V'][0][:]))
+        neuralData_yr3[index] = np.hstack(([STN_cog['V'][i][0] for i in N],STN_mot['V'][0][:]))
 
         for i in np.arange(nData):
             neuralSignals[i].set_ydata(neuralData_y[:,i])
@@ -1125,9 +1148,9 @@ while currentTrial < nbTrials:
 
     if len(invertAt) and currentTrial in invertAt:
         if invertAt.index(currentTrial) == 0:
-          cues_reward[2] = 39
+          cues_reward[2] = 0.9
         else:
-          cues_reward[2] = 33
+          cues_reward[2] = 0.3
     run(time=duration, dt=dt)
 
     if clock.time >= duration:
@@ -1166,7 +1189,7 @@ elif STORE_FAILED:
             if applyInMotorLoop:
                 st =  '\t'.join(['{:.0f}'.format(-1) for i in range(2*n)])
             else:
-                st = '\t'.join(['{:.0f}'.format(-1) for i in range(n)])
+                st = '\t'.join(['{:.0f}'.format(-1) for i in N])
             f.write("%d\t%d\t%d\t%d\t%d\t%d\t%s\n" % (currentTrial,failedTrials,selectionError,-1,-1,-1,
                 st))
         else:

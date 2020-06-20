@@ -1,6 +1,6 @@
 #!/bin/bash
 
-expName=_sweep
+expName=_ldtNoise
 
 HN=`hostname`
 
@@ -40,7 +40,11 @@ mkdir -p "$folder"
 # python parallel-model-learning.py $model $folder 100# 
 
 # python parallel-model-learning.py $folder 100
-python parallel-model-learning.py "$folder"
+python parallel-model-learning.py "$folder" 1
+python parallel-model-learning.py "$folder" 2
+python parallel-model-learning.py "$folder" 5
+python parallel-model-learning.py "$folder" 10
+python parallel-model-learning.py "$folder" 20
 # python parallel-model-learning.py "$folder"_sweep 3
 # python parallel-model-learning.py "$folder"_zeroValue 100 "--zeroValues"
 # python parallel-model-learning.py "$folder"_zeroRelativeValue 100 "--zeroValues --relative-value"

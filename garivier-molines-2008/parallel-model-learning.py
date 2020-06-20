@@ -12,8 +12,8 @@ parallelDivisions = False
 
 plotNeuralData = True
 
-firstDynamic = False
-DA_DIV = np.array([4.0]) # np.array([6.0,4.0,6.0,8.0]) #np.arange(0.0,2.6,0.5)
+firstDynamic = True
+DA_DIV = np.array([4.0,6.0]) # np.array([6.0,4.0,6.0,8.0]) #np.arange(0.0,2.6,0.5)
 DIVISIONS = DA_DIV.shape[0]
 TIMES = 5
 baseNumber = 0 
