@@ -12,12 +12,12 @@ parallelDivisions = False
 
 plotNeuralData = False
 
-firstDynamic = True
-DA_DIV = np.array([5.0,4.0,5.0,6.0]) # np.array([6.0,4.0,6.0,8.0]) #np.arange(0.0,2.6,0.5)
+DA_DIV = np.array([4.0,6.0,4.0,5.0]) # np.array([6.0,4.0,6.0,8.0]) #np.arange(0.0,2.6,0.5)
+dynamic = 2        # Configured as dynamic DA
 DIVISIONS = DA_DIV.shape[0]
-TIMES = 50
+TIMES = 10
 baseNumber = 0 
-NJOBS = 50
+NJOBS = 10
 WEIGHTS = None # np.array([["0.61414980 0.52987340 0.46941890 0.43399170","0.61561350 0.53347860 0.47005700 0.43940460","0.61691820 0.53227470 0.46791240 0.43998220","0.61740550 0.53296140 0.46909390 0.44151160","0.61779960 0.53731250 0.46666480 0.44043540","0.61750240 0.53647780 0.46687310 0.43947310"]])
 #STDP = np.array([[0.0000025,1.5*0.000075],[0.0000025,0.5*0.000075],[2*0.0000025,0.000075]])
 
@@ -112,7 +112,7 @@ def runModelLearning(i):
             DA = 0.5*float(i) if parallelDivisions else 0.5*float(j) #/float(DIVISIONS)
 
         bProcess = 'python learning.py -d'+str(DA)+' -f'+str(time + baseNumber).zfill(3)
-        if firstDynamic and j == 0:
+        if dynamic == j:
             bProcess += ' --dynamicDA'
 
         p = addNoise(bProcess)

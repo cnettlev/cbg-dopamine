@@ -135,7 +135,7 @@ aux_Y = options.parY
 
 if options.GM2008:
   n = 3
-  nbTrials = 1000 #9000
+  nbTrials = 10000 #9000
   invertAt = [3000,5000] #[3000,5000]
 
 
