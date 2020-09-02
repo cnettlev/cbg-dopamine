@@ -32,6 +32,8 @@ parser.add_option("-w", "--initWmean", dest="initialWeightsMean", type="float", 
                   help="Initial mean value for the corticostriatal weights. (Float)")
 parser.add_option("-i", "--cogInitW", dest="cogInitialWeights", type="float", nargs=4, default=None, metavar='cw0 cw1 cw2 ... cwn',
                   help="Initial cognitive corticostriatal weights. (Float array separated by spaces)")
+parser.add_option("--invertDynamic", dest="invDyn", action="store_true", default=False, metavar='INV_DYN',
+                  help="Inverts the effect of rewards (more rewards reduces tonic DA).")
 parser.add_option("-I", "--motInitW", dest="motInitialWeights", type="float", nargs=4, default=None, metavar='mw0 mw1 mw2 ... mwn',
                   help="Initial motor corticostriatal weights.(Float array separated by spaces)")
 parser.add_option("-L", "--ltp", dest="LTP", default=0.002, type="float",
@@ -82,6 +84,7 @@ def createUnexistentFolder(folder):
 perfBuff = np.abs(options.perfBuffSize)
 DA = options.DA
 dynamicDA = options.dynamicDA
+invertDynamic = options.invDyn
 tauTonicDA = options.tau_tonicDA
 n = options.n
 nbTrials = options.nTrials

@@ -831,7 +831,10 @@ def register(t):
         R.append(reward)
         smoothR = alpha_SucessEMA * smoothR + (1-alpha_SucessEMA) * reward
         if dynamicDA:
-            SNc_dop['SNc_h'] = SNc_h_base - gamma_DAbySuccess * smoothR
+            if invertDynamic:
+                SNc_dop['SNc_h'] = SNc_h_base + gamma_DAbySuccess * smoothR
+            else:
+                SNc_dop['SNc_h'] = SNc_h_base - gamma_DAbySuccess * smoothR
 
         # Compute prediction error
         pError = reward - cog_cues_value[choice]

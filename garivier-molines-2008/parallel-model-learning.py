@@ -6,14 +6,14 @@ import sys
 import numpy as np
 from time import sleep
 
-additionalOptions = ' -g -t 200 -b 12 --ltd-constant --correlatedNoise -S --relativeValue' # Increase the trials to 600, disable learning, use regular patterns -r100 --dynamicDA 
+additionalOptions = ' -g -t 200 -b 12 --ltd-constant --correlatedNoise -S --relativeValue --invertDynamic' # Increase the trials to 600, disable learning, use regular patterns -r100 --dynamicDA 
 
 parallelDivisions = False 
 
 plotNeuralData = False
 
-DA_DIV = np.array([4.0,6.0,4.0,5.0]) # np.array([6.0,4.0,6.0,8.0]) #np.arange(0.0,2.6,0.5)
-dynamic = 2        # Configured as dynamic DA
+DA_DIV = np.array([6.0]) # np.array([6.0,4.0,6.0,8.0]) #np.arange(0.0,2.6,0.5)
+dynamic = 0        # Configured as dynamic DA
 DIVISIONS = DA_DIV.shape[0]
 TIMES = 10
 baseNumber = 0 
