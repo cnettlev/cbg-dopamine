@@ -17,7 +17,7 @@ parser.add_option("--debug", dest="debug", action="store_true", default=False,
 parser.add_option("-D", "--disLearning", dest="disableLearning", action="store_true", default=False, help="Disable learning.")
 parser.add_option("-n", "--ncues", dest="n", default=4, type="int",
                   help="Number of cues to be presented. (Int)", metavar="nCues")
-parser.add_option("-f", "--file", dest="nFile", default="000",
+parser.add_option("-f", "--file", dest="nFile", default="",
                   help="Index number to be included in a storing data file. (String)")
 parser.add_option("-F", "--folder", dest="folder", default='', metavar='Path',
                   help="Folder destination for the storing data file. (String)")
@@ -41,6 +41,8 @@ parser.add_option("-M", "--mLearning", dest="applyInMotorLoop", action="store_tr
                   help="Enable learning in the motor loop.", metavar="ML")
 parser.add_option("-N", "--noiseLevel", dest="noise", default=.5, type="float",
                   help="Noise level in the substantia nigra. (float)", metavar="sncNoise")
+parser.add_option("--noisyWeights", dest="wnoise", default=0.0, type="float",
+                  help="If positive, enables gaussian noise injection at the start of a trial at the corticostriatal cognitive weights, with zero mean and a standard deviation of (weightValue-wMin)*wNoise. (float)", metavar="wNoise")
 parser.add_option("-p", "--regPattern", dest="useRegularPattern", action="store_true", default=False,
                   help="Sets the presentation of specific pair of cues in order to produce a controlled number of presentations for each combination.")
 parser.add_option("-P", "--activityPlots", dest="plotting", action="store_true", default=False,
@@ -58,6 +60,10 @@ parser.add_option("-R", "--expected-reward", dest="eReward", action="store_true"
 parser.add_option("-s", "--seed", dest="seed", default=0, type="int", metavar="S", help="Number use for initiating the random generator (0 for no initiation).")
 parser.add_option("-S", "--storeData", dest="storeData", action="store_true", default=False,
                   help="Enables the storing of generated data.")
+parser.add_option("--staticThreshold", dest="sThreshold", action="store_true", default=False,
+                  help="Disables DA dependence at striatal threshold.")
+parser.add_option("--staticCtxStr", dest="sCtxStr", action="store_true", default=False,
+                  help="Disables DA dependence at corticostriatal weights.")
 parser.add_option("-t", "--trials", dest="nTrials", default=120, type="int",
                   help="Number of trials. (Int)", metavar="nTrials")
 parser.add_option("--tonicDA-timeConstant", dest="tau_tonicDA", type="float", default=0.001, metavar="tDA_tau", help="Set the time constant of the tonic DA filter when dynamicDA is used.")
@@ -122,8 +128,12 @@ relativeValue = options.rValue
 cogReward = options.eReward
 randomInit = options.seed
 STORE_DATA = options.storeData
+staticThreshold = options.sThreshold
+staticCtxStr = options.sCtxStr
 useCorrelatedNoise = options.cNoise
 zeroValues = options.zValues
 doPrint = options.debug
 aux_X = options.parX
 aux_Y = options.parY
+
+Weights_N = options.wnoise

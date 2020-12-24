@@ -1,6 +1,6 @@
 #!/bin/bash
 
-expName=_ldtNoise
+expName=_weightsAndThreshold_Y1
 
 HN=`hostname`
 
@@ -40,11 +40,67 @@ mkdir -p "$folder"
 # python parallel-model-learning.py $model $folder 100# 
 
 # python parallel-model-learning.py $folder 100
-python parallel-model-learning.py "$folder" 1
-python parallel-model-learning.py "$folder" 2
-python parallel-model-learning.py "$folder" 5
-python parallel-model-learning.py "$folder" 10
-python parallel-model-learning.py "$folder" 20
+
+tab=" --tab"
+options=()
+
+# X -> CTX to STR
+# Y -> STR threshold
+
+cmds[1]="python parallel-model-learning.py "$folder" \" -X 0.46 -Y 0.5 \""
+
+cmds[2]="python parallel-model-learning.py "$folder" \" -X 0.48 -Y 0.5 \""
+
+cmds[3]="python parallel-model-learning.py "$folder" \" -X 0.52 -Y 0.5 \""
+
+cmds[4]="python parallel-model-learning.py "$folder" \" -X 0.54 -Y 0.5 \""
+
+cmds[5]="python parallel-model-learning.py "$folder" \" -Y 0.46 -X 0.5 \""
+
+cmds[6]="python parallel-model-learning.py "$folder" \" -Y 0.48 -X 0.5 \""
+
+cmds[7]="python parallel-model-learning.py "$folder" \" -Y 0.52 -X 0.5 \""
+
+cmds[8]="python parallel-model-learning.py "$folder" \" -Y 0.54 -X 0.5 \""
+
+# cmds[2]="python parallel-model-learning-3-plots.py "$folder" " # \" -X 0.4 -Y 1.25 --staticThreshold \""
+
+# cmds[3]="python parallel-model-learning-3-plots.py "$folder" " # \" -X 0.6 -Y 1.25 --staticThreshold \""
+
+# cmds[4]="python parallel-model-learning-3-plots.py "$folder" " # \" -X 0.8 -Y 1.25 --staticThreshold \""
+
+# cmds[5]="python parallel-model-learning-3-plots.py "$folder" " # \" -X 1.2 -Y 1.25 --staticThreshold \""
+
+# cmds[6]="python parallel-model-learning-3-plots.py "$folder" " # \" -X 1.4 -Y 1.25 --staticThreshold \""
+
+# cmds[7]="python parallel-model-learning-3-plots.py "$folder" " # \" -X 1.6 -Y 1.25 --staticThreshold \""
+
+# cmds[8]="python parallel-model-learning-3-plots.py "$folder" " # \" -X 1.8 -Y 1.25 --staticThreshold \""
+
+# cmds[9]="python parallel-model-learning-3-plots.py "$folder" " # \" -Y 0.2 -X 1.25 --staticCtxStr \""
+
+# cmds[10]="python parallel-model-learning-3-plots.py "$folder" " # \" -Y 0.4 -X 1.25 --staticCtxStr \""
+
+# cmds[11]="python parallel-model-learning-3-plots.py "$folder" " # \" -Y 0.6 -X 1.25 --staticCtxStr \""
+
+# cmds[12]="python parallel-model-learning-3-plots.py "$folder" " # \" -Y 0.8 -X 1.25 --staticCtxStr \""
+
+# cmds[13]="python parallel-model-learning-3-plots.py "$folder" " # \" -Y 1.2 -X 1.25 --staticCtxStr \""
+
+# cmds[14]="python parallel-model-learning-3-plots.py "$folder" " # \" -Y 1.4 -X 1.25 --staticCtxStr \""
+
+# cmds[15]="python parallel-model-learning-3-plots.py "$folder" " # \" -Y 1.6 -X 1.25 --staticCtxStr \""
+
+# cmds[16]="python parallel-model-learning-3-plots.py "$folder" " # \" -Y 1.8 -X 1.25 --staticCtxStr \""
+
+for cmd in "${cmds[@]}"; do
+options+=($tab --command="bash -c '$cmd ; bash'" )
+done
+
+gnome-terminal "${options[@]}"
+
+exit 0
+
 # python parallel-model-learning.py "$folder"_sweep 3
 # python parallel-model-learning.py "$folder"_zeroValue 100 "--zeroValues"
 # python parallel-model-learning.py "$folder"_zeroRelativeValue 100 "--zeroValues --relative-value"

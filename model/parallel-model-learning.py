@@ -6,14 +6,14 @@ import sys
 import numpy as np
 from time import sleep
 
-additionalOptions = ' -t 200 -b 12 -r 100 --ltd-constant --correlatedNoise --relativeValue ' # Increase the trials to 600, disable learning, use regular patterns -r100 --dynamicDA 
+additionalOptions = ' -S -t 200 -b 12 -r 100 --ltd-constant --correlatedNoise --noisyWeights 0.01 ' # Increase the trials to 600, disable learning, use regular patterns -r100 --dynamicDA 
 
 parallelDivisions = False 
 
 plotNeuralData = True
 
 firstDynamic = False
-DA_DIV = np.array([6.0,4.0]) # np.array([6.0,4.0,6.0,8.0]) #np.arange(0.0,2.6,0.5)
+DA_DIV = np.array([6.0,4.0,8.0]) # np.array([6.0,4.0,6.0,8.0]) #np.arange(0.0,2.6,0.5)
 DIVISIONS = DA_DIV.shape[0]
 TIMES = 5
 baseNumber = 0 
@@ -50,12 +50,16 @@ if len(sys.argv) > 1:
 else:
     folder = ''
 
-if len(sys.argv) > 2:
-    factor = float(sys.argv[2])
-    additionalOptions += ' -X '+str(10*factor)+' -Y '+str(factor)
+# if len(sys.argv) > 2:
+#     factor = float(sys.argv[2])
+#     # additionalOptions += ' -X '+str(10*factor)+' -Y '+str(factor)
+#     additionalOptions += ' --noisyWeights '+sys.argv[2]
 
-if len(sys.argv) > 3: #remaining options introduced as argument
-    additionalOptions += ' '+sys.argv[3]
+# if len(sys.argv) > 2:
+#     additionalOptions += ' -X '+sys.argv[2]
+# 
+if len(sys.argv) > 2: #remaining options introduced as argument
+    additionalOptions += ' '+sys.argv[2]
 
 def createList(process):
     if type(process) is str:
@@ -82,7 +86,7 @@ def addPlotting(processes):
     processes = createList(processes)
     output = []
     for p in processes:
-        output.append(p + ' --flashPlots 5 --storePlots 10')
+        output.append(p + ' --flashPlots 10 --storePlots 10')
     return output
 
 # def runParalelProcess(processes):

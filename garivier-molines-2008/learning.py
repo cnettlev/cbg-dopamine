@@ -77,7 +77,7 @@ import itertools
 # Default trial duration (max duration)
 duration = 3.5*second
 afterSelectionTime = 1.5*second
-stopAfterSelecion = False
+stopAfterSelecion = True
 
 # Default Time resolution
 dt = 1.0*millisecond
@@ -178,7 +178,8 @@ if STORE_DATA:
     DATA = OrderedDict([('n',n),('DA',DA),('SNc',0),('P-buff',0),('choice',0),('nchoice',0),('motTime',0)]+[('weight_'+str(c),0) for c in N]+[('cogTime',0),
                         ('failedTrials',0),('persistence',0)]+[('value_'+str(c),0) for c in N]+[('P',0),('P-3',0),('R',0),('R-buff',0),
                         ('P-3',0)]+[('ltd_dw_'+str(c),0) for c in N]+[('ltd_dwS_'+str(c),0) for c in N]+[('ltp_dw_'+str(c),0) for c in N]+
-                        [('ltp_dwS_'+str(c),0) for c in N]+[('A',0),('A-buff',0),('Regret',0),('cumRegret',0)])
+                        [('ltp_dwS_'+str(c),0) for c in N]+[('A',0),('A-buff',0),('Regret',0),('cumRegret',0)]+[('STR_cog_'+str(c),0) for c in N]+[('STR_mot_'+str(c),0) for c in N]+
+                        [('CTX_cog_'+str(c),0) for c in N]+[('CTX_mot_'+str(c),0) for c in N])
     with open(filename,"w") as file:
         wtr = csv.DictWriter(file, DATA.keys(),delimiter=',')
         wtr.writeheader()
@@ -365,6 +366,15 @@ def fillData():
     DATA['A-buff']                  = np.array(A[-perfBuff:]).mean()
     DATA['Regret']                  = Regret[-1:][0]
     DATA['cumRegret']                  = cumRegret
+
+    for c in N:
+        DATA['STR_cog_'+str(c)]       = Striatum_cog['Is'][c][0]
+    for c in N:
+        DATA['STR_mot_'+str(c)]       = Striatum_mot['Is'][0][c]
+    for c in N:
+        DATA['CTX_cog_'+str(c)]       = Cortex_cog['V'][c][0]
+    for c in N:
+        DATA['CTX_mot_'+str(c)]       = Cortex_mot['V'][0][c]
 
 def printData():
     # if applyInMotorLoop:
@@ -659,7 +669,7 @@ def propagateDA(t): # This should be implemented as a connection! but for quick 
 @after(clock.tick)
 def earlyStop(t):
     global currentTrial, continuousFailedTrials
-    if stopAfterSelecion and motDecisionTime < 3500:
+    if stopAfterSelecion and motDecisionTime < 3500 and cogDecisionTime < 3500:
         if t > motDecisionTime / 1000 + afterSelectionTime:
             if neuralPlot:
                 resetPlot()

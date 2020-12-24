@@ -86,12 +86,13 @@ stopAfterSelecion = False
 dt = 1.0*millisecond
 
 # Cortical inputs amplitude [sp/s]
-cues_amplitude = 22
+cues_amplitude = 16
 
 # Sigmoid parameter
 Vmin       =  0.0
 Vmax       = 20.0
 Vh         = 20 # 18.5
+Vh         = 18.18
 Vc         =  3.0
 
 # Thresholds
@@ -122,21 +123,24 @@ alpha_DA_arD2 = .1
 # DA burst height produced by a reward (modulated by the prediction error)
 alpha_Rew_DA = 15 # [sp/s]
 # DA strenght on striatal inputs
+gamma_DAth        = 2.5 #.25
 gamma_DAstrenght  = .5#.25
 gamma_DAbySuccess = 2 # [sp/s]
-alpha_SucessEMA   = .8
+alpha_SuccessEMA   = .8
 gamma_DA_LTD      = 0.025 # (1+gamma_DA_LTD * DA) -> 1.8 (4.0) - 2.2 (6.0) - 2.6 (8.0)
 gamma_mGluR_LTD   = 0.01 # 60 * (1+DA) -> 60 * 5 - 60*9 -> 300-700
 gamma_eCB1_LTD    = 0.1 # (1-20)
 
 # Noise level (%)
-Cortex_N        =   0.1   # * aux_X
-Striatum_N      =   0.1   # * aux_X
-Striatum_corr_N =   0.1    # * aux_Y
-STN_N           =   0.1   # * aux_X
-GPi_N           =   0.2   # * (aux_X/2.0)
-Thalamus_N      =   0.1   # * aux_X
-SNc_N           =   0.1    # * aux_Y
+Cortex_N        =   0.01
+Striatum_N      =   0.01
+Striatum_corr_N =   0.01
+STN_N           =   0.01
+GPi_N           =   0.02
+Thalamus_N      =   0.01
+SNc_N           =   0.01
+# if Weights_N:
+#     Weights_N *= aux_X
 # Cortex_N        =   0.01
 # Striatum_N      =   0.01
 # Striatum_corr_N =   0.1
@@ -166,33 +170,41 @@ avoidUnsavedPlots = True
 STORE_FAILED = False
 FAILED_FILE = folder+'failed_'+str(DA)
 
-file_base =  'DA_'+str(SNc_N)
+file_base =  'DA_'
 if useCorrelatedNoise:
     file_base += 'c_'
 if constantLTD:
     file_base += 'cLTD_' #+ str(constantLTD)
 if dynamicDA:
     file_base += 'd_'
+if relativeValue:
+    file_base += 'rv_'
 if invertAt:
     file_base += 'r'+str(invertAt)+'_'
+if Weights_N:
+    file_base += 'wN'+str(Weights_N)+'_'
+if aux_X != 1:
+    file_base += 'x'+str(aux_X)+'_'
+if aux_Y != 1:
+    file_base += 'y'+str(aux_Y)+'_'
+if staticThreshold:
+    file_base += 'sTh_'
+if staticCtxStr:
+    file_base += 'sCxtStr_'
 
-if folder:
-    file_base = folder+file_base
+file_base += str(DA)+'_'+str(alpha_LTP)+'_'+str(alpha_LTD)+'_'
+
+if nFile:
+    file_base += nFile
+else:
+    file_base += datetime.now().strftime("%Y%m%d")
 
 if STORE_DATA or STORE_FAILED:
     
-    if 'corcovado' == gethostname():
-        if not folder:
-            filename = '/mnt/Data/Cristobal/tonicDA_effects/connections/Exp/'+file_base+'__'+datetime.now().strftime("%Y%m%d")+'_'+nFile
-        else:
-            filename = file_base+str(DA)+'_'+str(alpha_LTP)+'_'+str(alpha_LTD)+'_'+nFile
-    elif 'lhotse' == gethostname():
-        if not folder:
-            filename = './Exp/'+file_base+str(DA)+'__'+datetime.now().strftime("%Y%m%d")+'_'+nFile
-        else:
-            filename = file_base+'_'+str(alpha_LTP)+'_'+str(alpha_LTD)+'_'+str(DA)+'_'+nFile
+    if 'corcovado' == gethostname() and  not folder:
+        filename = '/mnt/Data/Cristobal/tonicDA_effects/connections/Exp/'+file_base+''
     else:
-        filename = file_base+str(DA)+'_'+str(alpha_LTP)+'_'+str(alpha_LTD)+'_'+nFile
+        filename = folder+file_base+''
 
 if STORE_DATA:
     DATA = OrderedDict([('SNc',0),('P-buff',0),('choice',0),('nchoice',0),('motTime',0),('weights',''),('cogTime',0),
@@ -244,11 +256,22 @@ def flip(items, ncol):
 #     return np.exp(-(t-(rewardTime+3*dev))**2/(2*dev**2))
 
 def strThreshold(DA):
-    return (gamma_DAstrenght * DA + 1)*Vh # Factor was 19, but considering gamma_DAstrenght, dropped to 4.75 - testing 5.5
+    if staticThreshold:
+        return aux_Y*4*Vh # Considers DA = 4 sp/s => (0.5 * 4 + 1)*Vh
+    return gamma_DAth * DA + Vh # 
+
     # return 4.75 * DA + Vh # Factor was 19, but considering gamma_DAstrenght, dropped to 4.75 - testing 5.5
 
 def strSlope(DA):
     return 6.0 #* (1.0 + gamma_DAstrenght * DA)
+
+def ctxStr(DA):
+    if staticCtxStr:
+        return aux_X*4 #* (1.0 + gamma_DAstrenght * DA)
+    # return (1 + aux_X*gamma_DAstrenght*DA)
+    return (1 + gamma_DAstrenght*DA)
+
+
 
 def setDAlevels(DA):
     Striatum_cog['DA'] = DA
@@ -425,7 +448,7 @@ Cortex_ass   = zeros((n,n), """Is = I + Iext;
                              u = positiveClip(It - Cortex_h);
                              dV/dt = (-V + u)/Cortex_tau; I; Iext""")
 
-Striatum_cog = zeros((n,1), """Is = I*(1 + gamma_DAstrenght*DA);
+Striatum_cog = zeros((n,1), """Is = I*ctxStr(DA);
                              n = striatalNoise(Is,n);
                              It = Is + n;
                              Vh = strThreshold(DA);
@@ -433,7 +456,7 @@ Striatum_cog = zeros((n,1), """Is = I*(1 + gamma_DAstrenght*DA);
                              u = sigmoid(It - Striatum_h,Vmin,Vmax,Vh,Vc);
                              dV/dt = (-V + u)/Striatum_tau; I; DA""")
 
-Striatum_mot = zeros((1,n), """Is = I*(1 + gamma_DAstrenght*DA);
+Striatum_mot = zeros((1,n), """Is = I*ctxStr(DA);
                              n = striatalNoise(Is,n);
                              It = Is + n;
                              Vh = strThreshold(DA);
@@ -441,7 +464,7 @@ Striatum_mot = zeros((1,n), """Is = I*(1 + gamma_DAstrenght*DA);
                              u = sigmoid(It - Striatum_h,Vmin,Vmax,Vh,Vc);
                              dV/dt = (-V + u)/Striatum_tau; I; DA""")
 
-Striatum_ass = zeros((n,n), """Is = I*(1 + gamma_DAstrenght*DA);
+Striatum_ass = zeros((n,n), """Is = I*ctxStr(DA);
                              n = striatalNoise(Is,n);
                              It = Is + n;
                              Vh = strThreshold(DA);
@@ -518,12 +541,12 @@ W = DenseConnection( Cortex_mot('V'),   Striatum_ass('I'), np.ones((2*n+1,1)))
 init_weights(W,0.2)
 DenseConnection( Cortex_cog('V'),   STN_cog('I'),       1.0 )#1.0 )
 DenseConnection( Cortex_mot('V'),   STN_mot('I'),       1.0 )#1.0 )
-DenseConnection( Striatum_cog('V'), GPi_cog('I'),      -2.0 )
-DenseConnection( Striatum_mot('V'), GPi_mot('I'),      -2.0 )
+DenseConnection( Striatum_cog('V'), GPi_cog('I'),      -2.0 * aux_X)
+DenseConnection( Striatum_mot('V'), GPi_mot('I'),      -2.0 * aux_X )
 DenseConnection( Striatum_ass('V'), GPi_cog('I'),      -2.0*np.ones((1,2*n+1)))
 DenseConnection( Striatum_ass('V'), GPi_mot('I'),      -2.0*np.ones((2*n+1,1)))
-DenseConnection( STN_cog('V'),      GPi_cog('I'),       (4.0/n)*np.ones((2*n+1,1)))
-DenseConnection( STN_mot('V'),      GPi_mot('I'),       (4.0/n)*np.ones((1,2*n+1)))
+DenseConnection( STN_cog('V'),      GPi_cog('I'),       aux_Y*1.0*np.ones((2*n+1,1)))
+DenseConnection( STN_mot('V'),      GPi_mot('I'),       aux_Y*1.0*np.ones((1,2*n+1)))
 DenseConnection( GPi_cog('V'),      Thalamus_cog('I'), -0.5 )
 DenseConnection( GPi_mot('V'),      Thalamus_mot('I'), -0.5 )
 DenseConnection( Thalamus_cog('V'), Cortex_cog('I'),    1.0 )
@@ -583,6 +606,12 @@ def set_trial(t):
         texts[m2+n] += ' ^'
         axctx.legend(flip(neuralSignals2,n),flip(texts,n),loc='upper right', ncol=n, fontsize='x-small',framealpha=0.6, # bbox_to_anchor= (1.08, 0.5), #ncol=2, # bbox_to_anchor= (1.2, 0.5), 
                 borderaxespad=0, frameon=False)
+
+    if Weights_N:
+        W = W_cortex_cog_to_striatum_cog
+        for w in range(n):
+            wnoise = np.random.normal(0,(W.weights[w,w]-Wmin)*Weights_N)
+            W.weights[w,w] = clip(W.weights[w,w] + wnoise, Wmin, Wmax)
 
 @before(clock.tick)
 def computeSoftInput(t):
@@ -818,7 +847,7 @@ def register(t):
         # Compute reward
         reward = np.random.uniform(0,1) < cues_reward[choice]
         R.append(reward)
-        smoothR = alpha_SucessEMA * smoothR + (1-alpha_SucessEMA) * reward
+        smoothR = alpha_SuccessEMA * smoothR + (1-alpha_SuccessEMA) * reward
         if dynamicDA:
             SNc_dop['SNc_h'] = SNc_h_base - gamma_DAbySuccess * smoothR
 
@@ -1009,8 +1038,8 @@ if neuralPlot:
     plt.tight_layout()
 
     def storePlots():
-        plt.savefig(plotsFolder+str(DA)+'_'+str(alpha_LTP)+'_'+str(alpha_LTD)+'_neuralActivity_'+str(currentTrial)+"_"+str(nFile)+".pdf",bbox_inches='tight')
-        plt.savefig(plotsFolder+str(DA)+'_'+str(alpha_LTP)+'_'+str(alpha_LTD)+'_neuralActivity_'+str(currentTrial)+"_"+str(nFile)+".png",bbox_inches='tight')
+        plt.savefig(plotsFolder+file_base+'_'+str(currentTrial)+".pdf",bbox_inches='tight')
+        plt.savefig(plotsFolder+file_base+'_'+str(currentTrial)+".png",bbox_inches='tight')
 
     def drawPlots():
         fig.canvas.draw()
@@ -1065,7 +1094,8 @@ if neuralPlot:
         neuralData_y3_2[index][0] = SNc_dop['Ir']
         neuralData_y3_2[index][1] = SNc_dop['Irew']
         neuralData_y3_2[index][2] = SNc_dop['Ie_rew']
-        neuralData_y_str_is[index] = np.hstack(([Striatum_cog['Is'][i][0] for i in range(n)],Striatum_mot['Is'][0][:]))
+        #neuralData_y_str_is[index] = np.hstack(([Striatum_cog['Is'][i][0] for i in range(n)],Striatum_mot['I'][0][:]))
+        neuralData_y_str_is[index] = np.hstack(([Striatum_cog['Is'][i][0] for i in range(n)],[Striatum_cog['I'][i][0] for i in range(n)]))
         neuralData_y_str_th[index] = np.hstack(([Striatum_cog['Vh'][i][0] for i in range(n)],Striatum_mot['Vh'][0][:]))
 
         neuralData_yr1[index] = [Striatum_ass['V'][i][j] for j in range(n) for i in range(n)]
@@ -1148,19 +1178,11 @@ if STORE_FAILED and FAILED_FILE:
         f.write("%d\n" % failedTrials)
 elif STORE_FAILED:
     with open(filename,'a') as f:
-        if STORE_DATA:
-            if applyInMotorLoop:
-                st =  '\t'.join(['{:.0f}'.format(-1) for i in range(2*n)])
-            else:
-                st = '\t'.join(['{:.0f}'.format(-1) for i in range(n)])
-            f.write("%d\t%d\t%d\t%d\t%d\t%d\t%s\n" % (currentTrial,failedTrials,selectionError,-1,-1,-1,
-                st))
-        else:
-            f.write("%d\t%d\t%d\n" % (currentTrial,failedTrials,selectionError))
+        printData()
 
 if STORE_DATA and forceSelection and failedTrials >= nbFailedTrials:
-    filename += '_error'
-    with open(filename,'a') as f:
+    fileError = filename.replace('.csv','_error')
+    with open(fileError,'a') as f:
         f.write("\n")
 
 if neuralPlot:

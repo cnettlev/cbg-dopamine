@@ -5,7 +5,7 @@ expName=_garivier
 HN=`hostname`
 
 if [ "$HN" = "corcovado" ]; then
-	preFolder=/mnt/Data/Cristobal/tonicDA_effects/dynamicDA/
+	preFolder=/mnt/Data/Cristobal/tonicDA_effects/dynamicDAStrCtx/
 else
 	preFolder=""
 fi

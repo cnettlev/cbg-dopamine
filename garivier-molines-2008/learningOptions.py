@@ -136,13 +136,23 @@ doPrint = options.debug
 aux_X = options.parX
 aux_Y = options.parY
 
+file_base =  'gDA_'+str(SNc_N)
+
 if options.GM2008:
   n = 3
   nbTrials = 10000 #9000
   invertAt = [3000,5000] #[3000,5000]
 
+  if useCorrelatedNoise:
+      file_base += 'c_'
+  if constantLTD:
+      file_base += 'cLTD_' #+ str(constantLTD)
+  if dynamicDA:
+      file_base += 'd_'
+  if len(invertAt):
+      file_base += 'r'+'-'.join([str(i) for i in invertAt])+'_'
 
-file_base =  'gDA_'+str(SNc_N)
+
 if folder:
     file_base = folder+file_base
 
