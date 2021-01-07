@@ -86,7 +86,7 @@ stopAfterSelecion = False
 dt = 1.0*millisecond
 
 # Cortical inputs amplitude [sp/s]
-cues_amplitude = 16
+cues_amplitude = 20
 
 # Sigmoid parameter
 Vmin       =  0.0
@@ -124,7 +124,7 @@ alpha_DA_arD2 = .1
 alpha_Rew_DA = 15 # [sp/s]
 # DA strenght on striatal inputs
 gamma_DAth        = 2.5 #.25
-gamma_DAstrenght  = .5#.25
+gamma_DAstrenght  = .05#.25
 gamma_DAbySuccess = 2 # [sp/s]
 alpha_SuccessEMA   = .8
 gamma_DA_LTD      = 0.025 # (1+gamma_DA_LTD * DA) -> 1.8 (4.0) - 2.2 (6.0) - 2.6 (8.0)

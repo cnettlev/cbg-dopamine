@@ -1,6 +1,6 @@
 
 
-basicOptions='-l 0000065 -L 0.00009 -t 200 -r 100 --ltd-constant --correlatedNoise --noisyWeights 0.01 --relativeValue '
+basicOptions='-l 0.0000065 -L 0.00009 -t 200 -r 100 --ltd-constant --correlatedNoise --noisyWeights 0.01 --relativeValue '
 
 flashplots=' --flashPlots 1 ' # --storePlots 10'
 
