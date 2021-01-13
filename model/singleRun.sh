@@ -10,6 +10,6 @@ DA4=' -d 4.0 '
 DA6=' -d 6.0 '
 DA8=' -d 8.0 '
 
-#python learning.py $basicOptions $flashplots $@
-python learning.py $basicOptions $realTimePlot $@
+python learning.py $basicOptions $flashplots $@
+#python learning.py $basicOptions $realTimePlot $@
 

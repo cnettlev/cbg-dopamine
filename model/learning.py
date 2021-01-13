@@ -88,13 +88,6 @@ dt = 1.0*millisecond
 # Cortical inputs amplitude [sp/s]
 cues_amplitude = 20
 
-# Sigmoid parameter
-Vmin       =  0.0
-Vmax       = 20.0
-Vh         = 20 # 18.5
-Vh         = 18.18
-Vc         =  3.0
-
 # Thresholds
 Cortex_h   =  -3.0
 Striatum_h =   0.0
@@ -123,8 +116,8 @@ alpha_DA_arD2 = .1
 # DA burst height produced by a reward (modulated by the prediction error)
 alpha_Rew_DA = 15 # [sp/s]
 # DA strenght on striatal inputs
-gamma_DAth        = 2.5 #.25
-gamma_DAstrenght  = .05#.25
+gamma_DAth        = 0.4  
+gamma_DAstrenght  = .01  
 gamma_DAbySuccess = 2 # [sp/s]
 alpha_SuccessEMA   = .8
 gamma_DA_LTD      = 0.025 # (1+gamma_DA_LTD * DA) -> 1.8 (4.0) - 2.2 (6.0) - 2.6 (8.0)
@@ -153,6 +146,12 @@ SNc_N           =   0.01
 DA_buffSize = int(round(arD2_lag/dt))
 DA_buff = np.zeros((DA_buffSize,))
 DA_buffIndex = 0
+
+# Sigmoid parameter
+Vmin       =  0.0
+Vmax       = 20.0
+Vh         = -4.0 * gamma_DAth + 18.38
+Vc         =  6.0
 
 # Learning parameters
 decision_threshold = 30
@@ -917,7 +916,7 @@ if neuralPlot:
     fig, ((axstr,axr1),(axctx,axr2),(axsnc,axr3),(axstr_is,axw),(axstr_th,axv)) = plt.subplots(5,2,figsize=(20,10),num="DA: "+str(DA))#+" X_"+str(aux_X)+" Y_"+str(aux_Y))
 
     axstr.set_ylim(-2,25)
-    axstr.set_title('Cognitive striatal activity', fontsize=10)
+    axstr.set_title('Cognitive activity', fontsize=10)
     axctx.set_ylim(-2,100)
     axctx.set_title('Cortical activity', fontsize=10)
     axsnc.set_ylim(-10,20)
@@ -933,7 +932,7 @@ if neuralPlot:
     #axsnct.set_title('Trial-by-trial SNc activity', fontsize=10)
 
     axstr_is.set_ylim(0,200)
-    axstr_is.set_title('Cognitive striatal inputs', fontsize=10)
+    axstr_is.set_title('Striatal inputs', fontsize=10)
     axstr_th.set_ylim(0,200)
     axstr_th.set_title('Cognitive striatal thresholds', fontsize=10)
 
