@@ -86,7 +86,7 @@ stopAfterSelecion = False
 dt = 1.0*millisecond
 
 # Cortical inputs amplitude [sp/s]
-cues_amplitude = 20
+cues_amplitude = 16
 
 # Thresholds
 Cortex_h   =  -3.0
@@ -116,22 +116,22 @@ alpha_DA_arD2 = .1
 # DA burst height produced by a reward (modulated by the prediction error)
 alpha_Rew_DA = 15 # [sp/s]
 # DA strenght on striatal inputs
-gamma_DAth        = 0.4  
-gamma_DAstrenght  = .01  
-gamma_DAbySuccess = 2 # [sp/s]
+gamma_DAth        = 1
+gamma_DAstrenght  = .025
+gamma_DAbySuccess = 6 # [sp/s]
 alpha_SuccessEMA   = .8
 gamma_DA_LTD      = 0.025 # (1+gamma_DA_LTD * DA) -> 1.8 (4.0) - 2.2 (6.0) - 2.6 (8.0)
 gamma_mGluR_LTD   = 0.01 # 60 * (1+DA) -> 60 * 5 - 60*9 -> 300-700
 gamma_eCB1_LTD    = 0.1 # (1-20)
 
 # Noise level (%)
-Cortex_N        =   0.01
-Striatum_N      =   0.01
-Striatum_corr_N =   0.01
-STN_N           =   0.01
-GPi_N           =   0.02
-Thalamus_N      =   0.01
-SNc_N           =   0.01
+Cortex_N        =   N_factor * 0.01
+Striatum_N      =   N_factor * 0.01
+Striatum_corr_N =   N_factor * 0.5
+STN_N           =   N_factor * 0.01
+GPi_N           =   N_factor * 0.03
+Thalamus_N      =   N_factor * 0.01
+SNc_N           =   N_factor * 0.1
 # if Weights_N:
 #     Weights_N *= aux_X
 # Cortex_N        =   0.01
@@ -150,7 +150,7 @@ DA_buffIndex = 0
 # Sigmoid parameter
 Vmin       =  0.0
 Vmax       = 20.0
-Vh         = -4.0 * gamma_DAth + 18.38
+Vh0         = 18.38
 Vc         =  6.0
 
 # Learning parameters
@@ -169,7 +169,7 @@ avoidUnsavedPlots = True
 STORE_FAILED = False
 FAILED_FILE = folder+'failed_'+str(DA)
 
-file_base =  'DA_'
+file_base =  'CBG-DA_'
 if useCorrelatedNoise:
     file_base += 'c_'
 if constantLTD:
@@ -180,8 +180,8 @@ if relativeValue:
     file_base += 'rv_'
 if invertAt:
     file_base += 'r'+str(invertAt)+'_'
-if Weights_N:
-    file_base += 'wN'+str(Weights_N)+'_'
+if N_factor != 1.0:
+    file_base += 'N'+str(N_factor)+'_'
 if aux_X != 1:
     file_base += 'x'+str(aux_X)+'_'
 if aux_Y != 1:
@@ -203,7 +203,7 @@ if STORE_DATA or STORE_FAILED:
     if 'corcovado' == gethostname() and  not folder:
         filename = '/mnt/Data/Cristobal/tonicDA_effects/connections/Exp/'+file_base+''
     else:
-        filename = folder+file_base+''
+        filename = dataFolder+file_base+''
 
 if STORE_DATA:
     DATA = OrderedDict([('SNc',0),('P-buff',0),('choice',0),('nchoice',0),('motTime',0),('weights',''),('cogTime',0),
@@ -238,7 +238,7 @@ probChoice = np.zeros((nPatterns,probChoiceBuffSize))
 for p in range(nPatterns):
     for i in range(probChoiceBuffSize/2):
         probChoice[p][i] = 1
-print probChoice
+# print probChoice
 
 # Enable debug messages
 # doPrint = False
@@ -252,7 +252,7 @@ if randomInit:
 
 # Helper functions
 # -----------------------------------------------------------------------------
-def sigmoid(V,Vmin=Vmin,Vmax=Vmax,Vh=Vh,Vc=Vc):
+def sigmoid(V,Vmin=Vmin,Vmax=Vmax,Vh=Vh0,Vc=Vc):
     return  Vmin + (Vmax-Vmin)/(1.0+np.exp((Vh-V)/Vc))
 
 def flip(items, ncol):
@@ -263,8 +263,8 @@ def flip(items, ncol):
 
 def strThreshold(DA):
     if staticThreshold:
-        return aux_Y*4*Vh # Considers DA = 4 sp/s => (0.5 * 4 + 1)*Vh
-    return gamma_DAth * DA + Vh # 
+        return aux_Y*4*Vh0 # Considers DA = 4 sp/s => (0.5 * 4 + 1)*Vh
+    return gamma_DAth * DA + Vh0 # 
 
     # return 4.75 * DA + Vh # Factor was 19, but considering gamma_DAstrenght, dropped to 4.75 - testing 5.5
 
@@ -371,8 +371,9 @@ def resetPlot():
 
     neuralData_y.fill(None)
     neuralData_y2.fill(None)
-    neuralData_y3.fill(None)
-    neuralData_y3_2.fill(None)
+    neuralData_ysnc.fill(None)
+    neuralData_ypptn.fill(None)
+    neuralData_yth.fill(None)
     neuralData_yr1.fill(None)
     neuralData_yr2.fill(None)
     neuralData_yr3.fill(None)
@@ -433,7 +434,7 @@ def D2_IPSC_kernel(t,t_DelRew):
 def convolv_D2Kernel(t,currentValue,input):
     return currentValue + input * D2_IPSC_kernel(t,motDecisionTime/1000+arD2_lag)
 
-SNc_dop   = zeros((1,), """  D2_IPSC = - alpha_DA_arD2 * DAtoD2c;
+SNc_dop   = zeros((1,1), """  D2_IPSC = - alpha_DA_arD2 * DAtoD2c;
                              Ir = np.maximum(Irew, Ie_rew);
                              I = Ir + D2_IPSC;
                              n = correlatedNoise(I,n,SNc_N,alpha_Rew_DA,SNc_N_tau);
@@ -545,18 +546,18 @@ W_cortex_mot_to_striatum_mot = W
 
 W = DenseConnection( Cortex_ass('V'),   Striatum_ass('I'), 1.0)
 init_weights(W)
-W = DenseConnection( Cortex_cog('V'),   Striatum_ass('I'), np.ones((1,2*n+1)))
+W = DenseConnection( Cortex_cog('V'),   Striatum_ass('I'), np.ones((1,2*n-1)))
 init_weights(W,0.2)
-W = DenseConnection( Cortex_mot('V'),   Striatum_ass('I'), np.ones((2*n+1,1)))
+W = DenseConnection( Cortex_mot('V'),   Striatum_ass('I'), np.ones((2*n-1,1)))
 init_weights(W,0.2)
 DenseConnection( Cortex_cog('V'),   STN_cog('I'),       1.0 )#1.0 )
 DenseConnection( Cortex_mot('V'),   STN_mot('I'),       1.0 )#1.0 )
-DenseConnection( Striatum_cog('V'), GPi_cog('I'),      -2.0 * aux_X)
-DenseConnection( Striatum_mot('V'), GPi_mot('I'),      -2.0 * aux_X )
-DenseConnection( Striatum_ass('V'), GPi_cog('I'),      -2.0*np.ones((1,2*n+1)))
-DenseConnection( Striatum_ass('V'), GPi_mot('I'),      -2.0*np.ones((2*n+1,1)))
-DenseConnection( STN_cog('V'),      GPi_cog('I'),       aux_Y*1.0*np.ones((2*n+1,1)))
-DenseConnection( STN_mot('V'),      GPi_mot('I'),       aux_Y*1.0*np.ones((1,2*n+1)))
+DenseConnection( Striatum_cog('V'), GPi_cog('I'),      -2.4 )
+DenseConnection( Striatum_mot('V'), GPi_mot('I'),      -2.4 )
+DenseConnection( Striatum_ass('V'), GPi_cog('I'),      -2.0*np.ones((1,2*n-1)))
+DenseConnection( Striatum_ass('V'), GPi_mot('I'),      -2.0*np.ones((2*n-1,1)))
+DenseConnection( STN_cog('V'),      GPi_cog('I'),       1.0*np.ones((2*n-1,1)))
+DenseConnection( STN_mot('V'),      GPi_mot('I'),       1.0*np.ones((1,2*n-1)))
 DenseConnection( GPi_cog('V'),      Thalamus_cog('I'), -0.5 )
 DenseConnection( GPi_mot('V'),      Thalamus_mot('I'), -0.5 )
 DenseConnection( Thalamus_cog('V'), Cortex_cog('I'),    1.0 )
@@ -564,10 +565,9 @@ DenseConnection( Thalamus_mot('V'), Cortex_mot('I'),    1.0 )
 DenseConnection( Cortex_cog('V'),   Thalamus_cog('I'),  0.4 )
 DenseConnection( Cortex_mot('V'),   Thalamus_mot('I'),  0.4 )
 
-# To be fixed!
-# DenseConnection( SNc_dop('fDA'),   Striatum_cog('DA'),       1.0 )
-# DenseConnection( SNc_dop('fDA'),   Striatum_mot('DA'),       1.0 )
-# DenseConnection( SNc_dop('fDA'),   Striatum_ass('DA'),       1.0 )
+DenseConnection( SNc_dop('V'),   Striatum_cog('DA'),       1.0 )
+DenseConnection( SNc_dop('V'),   Striatum_mot('DA'),       1.0 )
+DenseConnection( SNc_dop('V'),   Striatum_ass('DA'),       1.0 )
 
 # Initial DA levels
 # -----------------------------------------------------------------------------
@@ -579,11 +579,13 @@ DenseConnection( Cortex_mot('V'),   Thalamus_mot('I'),  0.4 )
 inputCurrents_noise = np.zeros(6)
 c1,c2,m1,m2 = 0,0,0,0
 SNc_dop['SNc_h'] = SNc_h_base
+wnoise = 0
 
 @clock.at(500*millisecond)
 def set_trial(t):
     global cues_cog, cogDecision, cogDecisionTime, motDecision, motDecisionTime, c1, c2, m1, m2
     global inputCurrents_noise, flag, ctxLabels
+    global wnoise
 
     if regPattern:
         index = int(currentTrial/nbTrialsPerPattern)
@@ -622,6 +624,11 @@ def set_trial(t):
         W = W_cortex_cog_to_striatum_cog
         for w in range(n):
             wnoise = np.random.normal(0,(W.weights[w,w]-Wmin)*Weights_N)
+            # if useCorrelatedNoise:
+            #     delta = dt*(-wnoise + wnoise_t)/STR_N_tau
+            #     wnoise = wnoise + delta
+            # else:
+            #     wnoise = wnoise_t
             W.weights[w,w] = clip(W.weights[w,w] + wnoise, Wmin, Wmax)
 
 @before(clock.tick)
@@ -687,9 +694,9 @@ def deliverReward(t):
 #     if cogReward and cogDecisionTime/1000 + reward_ext - delayReward < t: # Comparison between [ms] 
 #         SNc_dop['Ie_rew'] = 0
 
-@before(clock.tick)
-def propagateDA(t): # This should be implemented as a connection! but for quick testing...
-    setDAlevels(SNc_dop['V'])
+# @before(clock.tick)
+# def propagateDA(t): # This should be implemented as a connection! but for quick testing...
+#     setDAlevels(SNc_dop['V'])
 
 @after(clock.tick)
 def earlyStop(t):
@@ -884,7 +891,7 @@ def register(t):
 
         ## Error regulates PPNg activity, the prediction error encoding signal
         if relativeValue:
-            pError = cog_cues_value[choice] - (cog_cues_value[choice]+cog_cues_value[nchoice])/2.0
+            pError = reward - (cog_cues_value[choice]+cog_cues_value[nchoice])/2.0
 
         if oneStepConstantLTD:
             W_cortex_cog_to_striatum_cog._weights -= alpha_LTD
@@ -926,8 +933,8 @@ if neuralPlot:
     plotSteps = 100*millisecond
     nData = 2*n
     nData2 = 2*n
-    nData3 = 3
-    nData3_2 = 3
+    nDataSnc = 1
+    nDataPptn = 3
     nData4 = n
     nData4_2 = nData4
     nData5 = n+2 # values plus choiced cue
@@ -939,40 +946,61 @@ if neuralPlot:
     nrData2 = 2*n
     nrData3 = 2*n
 
-    fig, ((axstr,axr1),(axctx,axr2),(axsnc,axr3),(axper,axw),(axprob,axv)) = plt.subplots(5,2,figsize=(20,10),num="DA: "+str(DA))#+" X_"+str(aux_X)+" Y_"+str(aux_Y))
+    fig, ((axl1,axr1),(axl2,axr2),(axl3,axr3),(axl4,axr4)) = plt.subplots(4,2,figsize=(20,10),num="Trial - DA: "+str(DA))#+" X_"+str(aux_X)+" Y_"+str(aux_Y))
+
+    axstr     = axl1
+    axstr_ass = axr1
+    axctx     = axl2
+    axgpi     = axr2
+    axsnc     = axl3
+    axstn     = axr3
+    axth      = axl4
+    axpptn    = axr4
+
+
+    fig2, ((axl1_2,axr1_2),(axl2_2,axr2_2),(axl3_2,axr3_2)) = plt.subplots(3,2,figsize=(20,10),num="Exp - DA: "+str(DA))#+" X_"+str(aux_X)+" Y_"+str(aux_Y))
+
+    axper  = axl1_2
+    axw    = axr1_2
+    axprob = axl2_2
+    axv    = axr2_2
+    axsnct = axl3_2
+    axentr = axr3_2
 
     axstr.set_ylim(-2,25)
     axstr.set_title('Striatal activity', fontsize=10)
     axctx.set_ylim(-2,100)
     axctx.set_title('Cortical activity', fontsize=10)
     axsnc.set_ylim(-10,20)
-    axsnc.set_title('SNc signals', fontsize=10)
-    axrwd = axsnc.twinx()
-    axrwd.set_ylim(-20,20)
-    #axrwd.set_title('Reward signals', fontsize=10)
+    axsnc.set_title('SNc activity', fontsize=10)
+    axpptn.set_ylim(-15,15)
+    axpptn.set_title('PPTN activity', fontsize=10)
 
-    axsnct = axsnc.twiny()
-    plt.setp(axsnct.get_xticklabels(), visible=False)
-    axsnct.xaxis.set_ticks_position('none') 
-    axsnct.set_ylim(0,20)
-    #axsnct.set_title('Trial-by-trial SNc activity', fontsize=10)
+    #axsnct = axsnc.twiny()
+    #plt.setp(axsnct.get_xticklabels(), visible=False)
+    #axsnct.xaxis.set_ticks_position('none') 
+    axsnct.set_ylim(0,10)
+    axsnct.set_title('SNc tonic activity', fontsize=10)
+
+    axentr.set_ylim(0,1)
+    axentr.set_title('Entropy', fontsize=10)
 
     axper.set_ylim(0,1)
     axper.set_title('Performance', fontsize=10)
     axreg = axper.twinx()
     axreg.set_ylim(0,200)
-    axprob.set_ylim(0,1)
+    axprob.set_ylim(0,1.1)
     axprob.set_title('Choice probability', fontsize=10)
 
     neuralData_x = np.arange(0,duration+plotSteps,plotSteps)
     neuralData_y = np.full((len(neuralData_x),nData),None,dtype=float)
     neuralData_y2 = np.full((len(neuralData_x),nData2),None,dtype=float)
-    neuralData_y3 = np.full((len(neuralData_x),nData3),None,dtype=float)
-    neuralData_y3_2 = np.full((len(neuralData_x),nData3_2),None,dtype=float)
+    neuralData_ysnc = np.full((len(neuralData_x),nDataSnc),None,dtype=float)
+    neuralData_ypptn = np.full((len(neuralData_x),nDataPptn),None,dtype=float)
     neuralSignals = axstr.plot(neuralData_x,neuralData_y, alpha=0.7)
     neuralSignals2 = axctx.plot(neuralData_x,neuralData_y2, alpha=0.7)
-    neuralSignals3 = axsnc.plot(neuralData_x,neuralData_y3, alpha=0.7)
-    neuralSignals3_2 = axrwd.plot(neuralData_x,neuralData_y3_2, alpha=0.3,linewidth=3)
+    neuralSignalsSnc = axsnc.plot(neuralData_x,neuralData_ysnc, alpha=0.7)
+    neuralSignalsPptn = axpptn.plot(neuralData_x,neuralData_ypptn, alpha=0.3,linewidth=3)
 
     axv.set_ylim(0,1)
     axv.set_title('Learned cognitive values', fontsize=10)
@@ -987,6 +1015,8 @@ if neuralPlot:
     neuralData_y4 = np.full((len(neuralData_x2),nData4),None,dtype=float)
     neuralData_y4_2 = np.full((len(neuralData_x2),nData4_2),None,dtype=float)
     neuralData_y5 = np.full((len(neuralData_x2),nData5),None,dtype=float)
+    neuralData_y_entr = np.full((len(neuralData_x2),1),None,dtype=float)
+    neuralSignals_entr = axentr.plot(neuralData_x2,neuralData_y_entr)
     neuralSignals_2 = axsnct.plot(neuralData_x2,neuralData_y_2,alpha=0.3,color='magenta',linewidth=3)
     neuralSignals4 = axw.plot(neuralData_x2,neuralData_y4, alpha=0.7)
     neuralSignals4_2 = axdw.plot(neuralData_x2,neuralData_y4_2, alpha=0.3,linewidth=5)
@@ -995,23 +1025,27 @@ if neuralPlot:
     neuralData_y_prob = np.full((len(neuralData_x2),nDataProb),None,dtype=float)
     neuralData_y_reg = np.full((len(neuralData_x2),1),None,dtype=float)
     neuralSignals_per = axper.plot(neuralData_x2,neuralData_y_perf, alpha=0.7)
-    neuralSignals_prob = axprob.plot(neuralData_x2,neuralData_y_prob, alpha=0.7)
-    neuralSignals_reg = axreg.plot(neuralData_x2,neuralData_y_reg, alpha=0.7)
+    neuralSignals_prob = axprob.plot(neuralData_x2,neuralData_y_prob, alpha=0.7, linewidth=3)
+    neuralSignals_reg = axreg.plot(neuralData_x2,neuralData_y_reg, alpha=0.7, color='purple', linewidth=3)
 
 
-    axr1.set_ylim(-2,25)
-    axr1.set_title('Associative striatal activity', fontsize=10)
-    axr2.set_ylim(-2,200)
-    axr2.set_title('GPi activity', fontsize=10)
-    axr3.set_ylim(-2,100)
-    axr3.set_title('STN activity', fontsize=10)
+    axstr_ass.set_ylim(-2,25)
+    axstr_ass.set_title('Associative striatal activity', fontsize=10)
+    axgpi.set_ylim(-2,200)
+    axgpi.set_title('GPi activity', fontsize=10)
+    axstn.set_ylim(-2,100)
+    axstn.set_title('STN activity', fontsize=10)
+    axth.set_ylim(-2,100)
+    axth.set_title('Th activity', fontsize=10)
 
     neuralData_yr1 = np.full((len(neuralData_x),nrData),None,dtype=float)
     neuralData_yr2 = np.full((len(neuralData_x),nrData2),None,dtype=float)
     neuralData_yr3 = np.full((len(neuralData_x),nrData3),None,dtype=float)
-    neuralSignalsr1 = axr1.plot(neuralData_x,neuralData_yr1, alpha=0.7)
-    neuralSignalsr2 = axr2.plot(neuralData_x,neuralData_yr2, alpha=0.7)
-    neuralSignalsr3 = axr3.plot(neuralData_x,neuralData_yr3, alpha=0.7)
+    neuralData_yth = np.full((len(neuralData_x),nData2),None,dtype=float)
+    neuralSignalsr1 = axstr_ass.plot(neuralData_x,neuralData_yr1, alpha=0.7)
+    neuralSignalsr2 = axgpi.plot(neuralData_x,neuralData_yr2, alpha=0.7)
+    neuralSignalsr3 = axstn.plot(neuralData_x,neuralData_yr3, alpha=0.7)
+    neuralSignalsTh = axth.plot(neuralData_x,neuralData_yth, alpha=0.7)
 
     plt.setp(neuralSignals5[n:], 'marker', 'D','linestyle','','alpha',0.2,'markersize',5)
     plt.setp(neuralSignals5[n], 'color','magenta')
@@ -1021,14 +1055,15 @@ if neuralPlot:
         plt.setp(neuralSignals[l+n],'color',plt.getp(neuralSignals[l],'color'),'ls','--')
         plt.setp(neuralSignalsr2[l+n],'color',plt.getp(neuralSignals[l],'color'),'ls','--')
         plt.setp(neuralSignalsr3[l+n],'color',plt.getp(neuralSignals[l],'color'),'ls','--')
+        plt.setp(neuralSignalsTh[l+n],'color',plt.getp(neuralSignals[l],'color'),'ls','--')
         # plt.setp(neuralSignals_per[l+n],'color',plt.getp(neuralSignals[l],'color'),'ls','--')
         # plt.setp(neuralSignals_str_th[l+n],'color',plt.getp(neuralSignals[l],'color'),'ls','--')
-    for l in range(2):
-        plt.setp(neuralSignals3_2[l+1],'ls',':')
+    # for l in range(2):
+    #     plt.setp(neuralSignals3_2[l+1],'ls',':')
     
 
-    axd = [axstr,axctx,axsnc,axrwd,axr1,axr2,axr3]
-    axt = [axsnct,axw,axdw,axv,axper,axprob]
+    axd = [axstr,axctx,axsnc,axstr_ass,axgpi,axstn, axth, axpptn]
+    axt = [axsnct,axw,axdw,axv,axper,axprob,axentr]
 
     def setXlim_d(t=duration):
         for axis in axd:
@@ -1050,13 +1085,16 @@ if neuralPlot:
     addLegend(axper,neuralSignals_per,['Performance','Advantage','Regret'],loc='upper left')
     addLegend(axprob,neuralSignals_prob,[str(x[0])+' - '+str(x[1]) for x in pattern])
     addLegend(axreg,neuralSignals_reg,'Acc. regret')
+    addLegend(axentr,neuralSignals_entr,'Entropy')
     addLegend(axctx,neuralSignals2, loc='upper left')
-    addLegend(axsnc,neuralSignals3+neuralSignals3_2+neuralSignals_2,['DA','tonicDA','I_DA/5']+['I_r','I_rew','Ie_rew']+['SNc'],n=3)
+    addLegend(axsnc,neuralSignalsSnc,['SNc'],n=3)
     addLegend(axw,neuralSignals4,['Wcog['+str(i)+']' for i in cues_cog])
     addLegend(axv,neuralSignals5,['Vcog['+str(i)+']' for i in cues_cog]+['Selection']+['Not selected'])
-    addLegend(axr1,neuralSignalsr1,['Ass'+str(i)+'_'+str(j) for j in range(n) for i in range(n)])
-    addLegend(axr2,neuralSignalsr2)
-    addLegend(axr3,neuralSignalsr3)
+    addLegend(axstr_ass,neuralSignalsr1,['Ass'+str(i)+'_'+str(j) for j in range(n) for i in range(n)])
+    addLegend(axgpi,neuralSignalsr2)
+    addLegend(axstn,neuralSignalsr3)
+    addLegend(axth,neuralSignalsTh)
+    addLegend(axpptn,neuralSignalsPptn,['I_r','I_rew','Ie_rew'])
     ## axstr.legend(flip(neuralSignals,n),flip(labels,n),loc='upper right', ncol=n, fontsize='x-small', # bbox_to_anchor= (1.08, 0.5), 
     ##         borderaxespad=0, frameon=False)
     ## axstr_is.legend(flip(neuralSignals_per,n),flip(labels,n),loc='upper right', ncol=n, fontsize='x-small', # bbox_to_anchor= (1.08, 0.5), 
@@ -1075,18 +1113,21 @@ if neuralPlot:
     ##         borderaxespad=0, frameon=False)
     ## axv.legend(flip(neuralSignals5,n),flip(['Vcog['+str(i)+']' for i in cues_cog]+['Selection']+['Not selected'],n),loc='upper right', ncol=n, fontsize='x-small',framealpha=0.6, # bbox_to_anchor= (1.08, 0.5), # bbox_to_anchor= (1.15, 0.5), 
     ##         borderaxespad=0, frameon=False)
-    ## axr1.legend(flip(neuralSignalsr1,n),flip(['Ass'+str(i)+'_'+str(j) for j in range(n) for i in range(n)],n),loc='upper right', fontsize='x-small', #bbox_to_anchor= (1.1, 0.5), 
+    ## axstr_ass.legend(flip(neuralSignalsr1,n),flip(['Ass'+str(i)+'_'+str(j) for j in range(n) for i in range(n)],n),loc='upper right', fontsize='x-small', #bbox_to_anchor= (1.1, 0.5), 
     ##     borderaxespad=0, frameon=False, ncol=n)
-    ## axr2.legend(flip(neuralSignalsr2,n),flip(labels,n),loc='upper right', ncol=n, fontsize='x-small', # bbox_to_anchor= (1.08, 0.5), 
+    ## axgpi.legend(flip(neuralSignalsr2,n),flip(labels,n),loc='upper right', ncol=n, fontsize='x-small', # bbox_to_anchor= (1.08, 0.5), 
     ##     borderaxespad=0, frameon=False)
-    ## axr3.legend(flip(neuralSignalsr3,n),flip(labels,n),loc='upper right', ncol=n, fontsize='x-small', # bbox_to_anchor= (1.08, 0.5), 
+    ## axstn.legend(flip(neuralSignalsr3,n),flip(labels,n),loc='upper right', ncol=n, fontsize='x-small', # bbox_to_anchor= (1.08, 0.5), 
     ##     borderaxespad=0, frameon=False)
 
-    plt.tight_layout()
+    fig.tight_layout()
+    fig2.tight_layout()
 
     def storePlots():
-        plt.savefig(plotsFolder+file_base+'_'+str(currentTrial)+".pdf",bbox_inches='tight')
-        plt.savefig(plotsFolder+file_base+'_'+str(currentTrial)+".png",bbox_inches='tight')
+        fig.savefig(plotsFolder+file_base+'_'+str(currentTrial)+".pdf",bbox_inches='tight')
+        fig.savefig(plotsFolder+file_base+'_'+str(currentTrial)+".png",bbox_inches='tight')
+        fig2.savefig(plotsFolder+file_base+'_'+str(currentTrial)+"2.png",bbox_inches='tight')
+        fig2.savefig(plotsFolder+file_base+'_'+str(currentTrial)+"2.pdf",bbox_inches='tight')
 
     def drawPlots():
         fig.canvas.draw()
@@ -1127,14 +1168,21 @@ if neuralPlot:
         neuralData_y_2[currentTrial] = SNc_dop['V']
         neuralData_y4[currentTrial] = np.diag(W_cortex_cog_to_striatum_cog._weights)
         neuralData_y5[currentTrial][:n] = cog_cues_value
-        neuralData_y_perf[currentTrial] = [np.array(P[-perfBuff:]).mean(),
-                                          np.array(A[-perfBuff:]).mean(),
-                                          np.array(Regret[-perfBuff:]).mean()]
+        if P:
+            neuralData_y_perf[currentTrial] = [np.array(P[-perfBuff:]).mean(),
+                                              np.array(A[-perfBuff:]).mean(),
+                                              np.array(Regret[-perfBuff:]).mean()]
         neuralData_y_prob[currentTrial] = np.nanmean(probChoice,axis=1)
         neuralData_y_reg[currentTrial] = cumRegret
 
+        entr = 0
+        for prob in neuralData_y_prob[currentTrial]:
+            entr -= prob * np.log(prob)
+        neuralData_y_entr[currentTrial] = entr / len(neuralData_y_prob[currentTrial])
+
         neuralSignals_reg[0].set_ydata(neuralData_y_reg)
         neuralSignals_2[0].set_ydata(neuralData_y_2)
+        neuralSignals_entr[0].set_ydata(neuralData_y_entr)
 
         if currentTrial>0:
             neuralData_y4_2[currentTrial] = neuralData_y4[currentTrial] - neuralData_y4[currentTrial-1]
@@ -1157,12 +1205,13 @@ if neuralPlot:
         index = int(round(t/plotSteps))
         neuralData_y[index] = np.hstack(([Striatum_cog['V'][i][0] for i in range(n)],Striatum_mot['V'][0][:]))
         neuralData_y2[index] = np.hstack(([Cortex_cog['V'][i][0] for i in range(n)],Cortex_mot['V'][0][:]))
-        neuralData_y3[index][0] = SNc_dop['V']
-        neuralData_y3[index][1] = -SNc_dop['SNc_h']
-        neuralData_y3[index][2] = SNc_dop['D2_IPSC']/5.0
-        neuralData_y3_2[index][0] = SNc_dop['Ir']
-        neuralData_y3_2[index][1] = SNc_dop['Irew']
-        neuralData_y3_2[index][2] = SNc_dop['Ie_rew']
+        neuralData_ysnc[index][0] = SNc_dop['V']
+        # neuralData_y3[index][1] = -SNc_dop['SNc_h']
+        # neuralData_y3[index][2] = SNc_dop['D2_IPSC']/5.0
+        neuralData_yth[index] = np.hstack(([Thalamus_cog['V'][i][0] for i in range(n)],Thalamus_mot['V'][0][:]))
+        neuralData_ypptn[index][0] = SNc_dop['Ir']
+        neuralData_ypptn[index][1] = SNc_dop['Irew']
+        neuralData_ypptn[index][2] = SNc_dop['Ie_rew']
 
         neuralData_yr1[index] = [Striatum_ass['V'][i][j] for j in range(n) for i in range(n)]
         neuralData_yr2[index] = np.hstack(([GPi_cog['V'][i][0] for i in range(n)],GPi_mot['V'][0][:]))
@@ -1172,10 +1221,11 @@ if neuralPlot:
             neuralSignals[i].set_ydata(neuralData_y[:,i])
         for i in np.arange(nData2):
             neuralSignals2[i].set_ydata(neuralData_y2[:,i])
-        for i in np.arange(nData3):
-            neuralSignals3[i].set_ydata(neuralData_y3[:,i])
-        for i in np.arange(nData3_2):
-            neuralSignals3_2[i].set_ydata(neuralData_y3_2[:,i])
+            neuralSignalsTh[i].set_ydata(neuralData_yth[:,i])
+        for i in np.arange(nDataSnc):
+            neuralSignalsSnc[i].set_ydata(neuralData_ysnc[:,i])
+        for i in np.arange(nDataPptn):
+            neuralSignalsPptn[i].set_ydata(neuralData_ypptn[:,i])
         for i in np.arange(nrData):
             neuralSignalsr1[i].set_ydata(neuralData_yr1[:,i])
         for i in np.arange(nrData2):

@@ -1,14 +1,13 @@
 from optparse import OptionParser
 import numpy as np
 import os
+import errno
 
 usage = "usage: %prog [option_1 [arg_option_1] option_2 [arg_option_2] ...]"
 parser = OptionParser(usage=usage)
-parser.add_option("-b", "--performanceBuffSize", dest="perfBuffSize", default=0, type="int",
+parser.add_option("-b", "--performanceBuffSize", dest="perfBuffSize", default=12, type="int",
                   help="Number of trials used for computing the resulting performance. Use PERF_BUFF equal to 0 for using all \
                   the past trials. Negative values are automatically set as positive. (Int)", metavar="PERF_BUFF")
-parser.add_option("--correlatedNoise", dest="cNoise", action="store_true", default=False,
-                  help="Enables the use of correlated noise in the dopamine affected striatal populations.", metavar="corrNoise")
 parser.add_option("-d", "--da", dest="DA", default=4.0, type="float",
                   help="Tonic DA level. (Float)", metavar="DA")
 parser.add_option("--dynamicDA", dest="dynamicDA", action="store_true", default=False, help="Enable dynamic tonic DA.")
@@ -39,9 +38,9 @@ parser.add_option("--ltd-constant-onestep", dest="oScLTD", action="store_true", 
                   help="Enables an artificially introduced long term depression applied in the corticostriatal connections, once by trial.", metavar="oScLTD")
 parser.add_option("-M", "--mLearning", dest="applyInMotorLoop", action="store_true", default=False,
                   help="Enable learning in the motor loop.", metavar="ML")
-parser.add_option("-N", "--noiseLevel", dest="noise", default=.5, type="float",
-                  help="Noise level in the substantia nigra. (float)", metavar="sncNoise")
-parser.add_option("--noisyWeights", dest="wnoise", default=0.0, type="float",
+parser.add_option("-N", "--noiseLevel", dest="noise", default=1.0, type="float",
+                  help="Noise factor. (float)", metavar="NOISE")
+parser.add_option("--noisyWeights", dest="wnoise", default=0.05, type="float",
                   help="If positive, enables gaussian noise injection at the start of a trial at the corticostriatal cognitive weights, with zero mean and a standard deviation of (weightValue-wMin)*wNoise. (float)", metavar="wNoise")
 parser.add_option("-p", "--regPattern", dest="useRegularPattern", action="store_true", default=False,
                   help="Sets the presentation of specific pair of cues in order to produce a controlled number of presentations for each combination.")
@@ -51,7 +50,7 @@ parser.add_option("--pausePlots", dest="pPlots", action="store_true", default=Fa
                   help="If plotting, introduce a pause (wait for a button).")
 parser.add_option("--storePlots", dest="savePlots", default=-1, type="int", metavar="NPLOTS",
                   help="If plots are activated, stores the plots as pdf figures every NPLOTS trials.")
-parser.add_option("-r", "--reverseAt", dest="reverseTrial", default=0, type="int", metavar="RTRIAL", help="Enables a flip of the vector \
+parser.add_option("-r", "--reverseAt", dest="reverseTrial", default=60, type="int", metavar="RTRIAL", help="Enables a flip of the vector \
                   that contains the reward probabilities at trial number RTRIAL of the experiment. 0 means no flip.")
 parser.add_option("--relativeValue", dest="rValue", action="store_true", default=False,
                   help="Computes prediction error with respect to a relative expected value defines as the mean between expected values of perceived cues.")
@@ -67,6 +66,8 @@ parser.add_option("--staticCtxStr", dest="sCtxStr", action="store_true", default
 parser.add_option("-t", "--trials", dest="nTrials", default=120, type="int",
                   help="Number of trials. (Int)", metavar="nTrials")
 parser.add_option("--tonicDA-timeConstant", dest="tau_tonicDA", type="float", default=0.001, metavar="tDA_tau", help="Set the time constant of the tonic DA filter when dynamicDA is used.")
+parser.add_option("--uncorrelatedNoise", dest="ucNoise", action="store_true", default=False,
+                  help="Disables the use of correlated noise in the dopamine affected striatal populations.", metavar="ucorrNoise")
 parser.add_option("-z", "--zeroValues", dest="zValues", action="store_true", default=False,
                   help="Set initial cues values as zero.")
 parser.add_option("-X","--parameterX", dest="parX", default=1, type="float",
@@ -78,7 +79,11 @@ parser.add_option("-Y","--parameterY", dest="parY", default=1, type="float",
 
 def createUnexistentFolder(folder):
     if not os.path.exists(folder):
-        os.makedirs(folder)
+        try:
+            os.makedirs(folder)
+        except OSError as e:
+            if e.errno != errno.EEXIST:
+                raise  # raises the error again        
 
 perfBuff = np.abs(options.perfBuffSize)
 DA = options.DA
@@ -122,15 +127,18 @@ if storePlotsEvery > 0:
       plotsFolder = folder+'neuralPlots/'
       createUnexistentFolder(plotsFolder)
 learn = not options.disableLearning
-SNc_N = options.noise
+N_factor = options.noise
 invertAt = options.reverseTrial
 relativeValue = options.rValue
 cogReward = options.eReward
 randomInit = options.seed
 STORE_DATA = options.storeData
+if STORE_DATA:
+    dataFolder = folder+'data/'
+    createUnexistentFolder(dataFolder)
 staticThreshold = options.sThreshold
 staticCtxStr = options.sCtxStr
-useCorrelatedNoise = options.cNoise
+useCorrelatedNoise = not options.ucNoise
 zeroValues = options.zValues
 doPrint = options.debug
 aux_X = options.parX

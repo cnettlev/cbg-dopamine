@@ -1,6 +1,6 @@
 #!/bin/bash
 
-expName=dinamycDA_noises
+expName=garivier
 
 HN=`hostname`
 
@@ -30,13 +30,13 @@ tab=" --tab"
 options=()
 
 
-cmds[1]="python parallel-learning.py -l -f $folder -t 50 -b 50 -n 5 -a \" -d 4.0 --dynamicDA\""
+cmds[1]="python parallel-learning.py -l -f $folder -t 20 -n 1 -a \" -d 4.0 --dynamicDA --garivierMoulines\""
 
-cmds[2]="python parallel-learning.py -l -f $folder -t 50 -b 50 -n 5 -a \" -d 4.0 \""
+cmds[2]="python parallel-learning.py -l -f $folder -t 20 -n 1 -a \" -d 4.0 --garivierMoulines\""
 
-cmds[3]="python parallel-learning.py -l -f $folder -t 50 -b 50 -n 5 -a \" -d 6.0 \""
+cmds[3]="python parallel-learning.py -l -f $folder -t 20 -n 1 -a \" -d 6.0 --garivierMoulines\""
 
-cmds[4]="python parallel-learning.py -l -f $folder -t 50 -b 50 -n 5 -a \" -d 8.0 \""
+cmds[4]="python parallel-learning.py -l -f $folder -t 20 -n 1 -a \" -d 8.0 --garivierMoulines\""
 
 
 for cmd in "${cmds[@]}"; do
