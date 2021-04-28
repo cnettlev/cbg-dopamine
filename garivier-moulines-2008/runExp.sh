@@ -30,13 +30,13 @@ tab=" --tab"
 options=()
 
 
-cmds[1]="python parallel-learning.py -l -f $folder -t 20 -n 1 -a \" -d 4.0 --dynamicDA --garivierMoulines\""
+cmds[1]="python parallel-learning.py -l -f $folder -t 1 -n 1 -P -a \" -S -d 4.0 --dynamicDA --garivierMoulines \""
 
-cmds[2]="python parallel-learning.py -l -f $folder -t 20 -n 1 -a \" -d 4.0 --garivierMoulines\""
-
-cmds[3]="python parallel-learning.py -l -f $folder -t 20 -n 1 -a \" -d 6.0 --garivierMoulines\""
-
-cmds[4]="python parallel-learning.py -l -f $folder -t 20 -n 1 -a \" -d 8.0 --garivierMoulines\""
+# cmds[2]="python parallel-learning.py -l -f $folder -t 5 -n 2 -a \" -S -d 4.0 --garivierMoulines\""
+# 
+# cmds[3]="python parallel-learning.py -l -f $folder -t 5 -n 2 -a \" -S -d 6.0 --garivierMoulines\""
+# 
+# cmds[4]="python parallel-learning.py -l -f $folder -t 5 -n 2 -a \" -S -d 8.0 --garivierMoulines\""
 
 
 for cmd in "${cmds[@]}"; do
@@ -48,7 +48,5 @@ if [ "$HN" = "dell" ]; then
 else
 	gnome-terminal "${options[@]}"
 fi
-
-cd $folder
 
 exit 0

@@ -75,7 +75,7 @@ stopAfterSelecion = False
 dt = 1.0*millisecond
 
 # Cortical inputs amplitude [sp/s]
-cues_amplitude = 16
+cues_amplitude = 22 if garivierMoulines else 16
 
 # Thresholds
 Cortex_h   =  -3.0
@@ -139,7 +139,7 @@ DA_buffIndex = 0
 # Sigmoid parameter
 Vmin       =  0.0
 Vmax       = 20.0
-Vh0         = 18.38
+Vh0         = 18.18 # 18.38
 Vc         =  6.0
 
 # Learning parameters
@@ -159,6 +159,9 @@ STORE_FAILED = False
 FAILED_FILE = folder+'failed_'+str(DA)
 
 file_base =  'CBG-DA_'
+
+if garivierMoulines:
+    file_base += 'gM_'
 if useCorrelatedNoise:
     file_base += 'c_'
 if constantLTD:
@@ -168,7 +171,8 @@ if dynamicDA:
 if relativeValue:
     file_base += 'rv_'
 if invertAt:
-    file_base += 'r'+str(invertAt)+'_'
+    for rAt in invertAt:
+        file_base += 'r'+str(rAt)+'_'
 if N_factor != 1.0:
     file_base += 'N'+str(N_factor)+'_'
 if aux_X != 1:
@@ -197,7 +201,7 @@ if STORE_DATA or STORE_FAILED:
 if STORE_DATA:
     DATA = OrderedDict([('SNc',0),('P-buff',0),('choice',0),('nchoice',0),('motTime',0),('weights',''),('cogTime',0),
                         ('failedTrials',0),('persistence',0),('values',''),('P',0),('P-3',0),('R',0),('R-buff',0),
-                        ('P-3',0),('LTD-LTP',''),('A',0),('A-buff',0),('pchoice',''),('Regret',0),('cumRegret',0)])
+                        ('P-3',0),('LTD-LTP',''),('A',0),('A-buff',0),('pchoice',''),('Regret',0),('cumRegret',0),('c_rewards','')])
     with open(filename,"w") as records:
         wtr = csv.DictWriter(records, DATA.keys(),delimiter=',')
         wtr.writeheader()
@@ -221,33 +225,29 @@ nbContFailedTrials = 20
 # regPattern = False
 nbTrialsPerPattern = 100
 
-if not garivierMoulines:
-    pattern = np.array([[0,1],[0,2],[0,3],[1,2],[1,3],[2,3]])
-    nPatterns = len(pattern)
-    n_availableOptions = 2
-else:
+if garivierMoulines:
     invertAt = [300,500]
     nbTrials = 1000
     n = 3
     pattern = np.array([0,1,2])
     nPatterns = len(pattern)
     n_availableOptions = 3
+else:
+    pattern = np.array([[0,1],[0,2],[0,3],[1,2],[1,3],[2,3]])
+    nPatterns = len(pattern)
+    n_availableOptions = 2
 
 probChoiceBuffSize = 10
 probChoice = np.zeros((nPatterns,probChoiceBuffSize))
 for p in range(nPatterns):
     for i in range(probChoiceBuffSize/2):
         probChoice[p][i] = 1
-# print probChoice
 
 # Enable debug messages
 # doPrint = False
 
-if pasquereau:
-    invert = -1
-else:
-    inverAt = nbTrials/2
-
+if invertAt and not (type(invertAt).__module__ == 'numpy' ):
+    invertAt = np.array(invertAt)
 
 
 # Initialization of the random generator
@@ -385,7 +385,7 @@ def positiveClip(V):
     return np.maximum(V, 0.0)
 
 def fillData():
-    DATA['SNc']          = SNc_dop['V']
+    DATA['SNc']          = SNc_dop['V'][0][0]
     DATA['P-buff']       = np.array(P[-perfBuff:]).mean()
     DATA['choice']       = choice
     DATA['nchoice']      = nchoice if not garivierMoulines else -1
@@ -405,6 +405,7 @@ def fillData():
     DATA['pchoice']      = '\t'.join(['{:.2f}'.format(np.nanmean(i)) for i in probChoice])
     DATA['Regret']       = Regret[-1:][0]
     DATA['cumRegret']    = cumRegret
+    DATA['c_rewards']    = '\t'.join(['{:.2f}'.format(i) for i in cues_reward])
 
 def printData():
     with open(filename,'a') as records:
@@ -510,16 +511,19 @@ else:
 mot_cues_value = np.ones(n) * 0.5
 
 if garivierMoulines:
-    cues_reward = np.array([0.5,0.4,0.3,])
+    cues_reward1 = np.array([0.5,0.4,0.3,])
     cues_reward2 = np.array([0.5,0.4,0.9,])
     cues_reward3 = np.array([0.5,0.4,0.3,])
-    cues_rewards = [cues_reward, cues_reward2, cues_reward3]
-if pasquereau:
-    cues_reward = np.array([3.0,2.0,1.0,0.0])/3.0
+    cues_rewards = [cues_reward1, cues_reward2, cues_reward3]
+elif pasquereau:
+    cues_reward1 = np.array([3.0,2.0,1.0,0.0])/3.0
+    cues_rewards = [cues_reward1]
 else:
-    cues_reward = np.array([3.0,2.0,1.0,0.0])/3.0
+    cues_reward1 = np.array([3.0,2.0,1.0,0.0])/3.0
     cues_reward2 = np.array([0.0,1.0,2.0,3.0])/3.0
-    cues_rewards = [cues_reward, cues_reward2]
+    cues_rewards = [cues_reward1, cues_reward2]
+
+cues_reward = cues_rewards[0]
 
 # Connectivity
 # -----------------------------------------------------------------------------
@@ -548,27 +552,29 @@ W = DenseConnection( Cortex_mot('V'),   Striatum_ass('I'), np.ones((2*n-1,1)))
 init_weights(W,0.2)
 DenseConnection( Cortex_cog('V'),   STN_cog('I'),       1.0 )
 DenseConnection( Cortex_mot('V'),   STN_mot('I'),       1.0 )
-DenseConnection( Striatum_cog('V'), GPi_cog('I'),      -2.4 )
-DenseConnection( Striatum_mot('V'), GPi_mot('I'),      -2.4 )
+if n_availableOptions == 3:
+    DenseConnection( Striatum_cog('V'), GPi_cog('I'),      -2.4 )
+    DenseConnection( Striatum_mot('V'), GPi_mot('I'),      -2.4 )
+else:
+    DenseConnection( Striatum_cog('V'), GPi_cog('I'),      -2.4 )
+    DenseConnection( Striatum_mot('V'), GPi_mot('I'),      -2.4 )
 DenseConnection( Striatum_ass('V'), GPi_cog('I'),      -2.0*np.ones((1,2*n-1)))
 DenseConnection( Striatum_ass('V'), GPi_mot('I'),      -2.0*np.ones((2*n-1,1)))
-DenseConnection( STN_cog('V'),      GPi_cog('I'),       1.0*np.ones((2*n-1,1)))
-DenseConnection( STN_mot('V'),      GPi_mot('I'),       1.0*np.ones((1,2*n-1)))
+if n_availableOptions == 3:
+    DenseConnection( STN_cog('V'),      GPi_cog('I'),       1.0*np.ones((2*n-1,1)))
+    DenseConnection( STN_mot('V'),      GPi_mot('I'),       1.0*np.ones((1,2*n-1)))
+else:
+    DenseConnection( STN_cog('V'),      GPi_cog('I'),       1.0*np.ones((2*n-1,1)))
+    DenseConnection( STN_mot('V'),      GPi_mot('I'),       1.0*np.ones((1,2*n-1)))
 DenseConnection( GPi_cog('V'),      Thalamus_cog('I'), -0.5 )
 DenseConnection( GPi_mot('V'),      Thalamus_mot('I'), -0.5 )
 DenseConnection( Thalamus_cog('V'), Cortex_cog('I'),    1.0 )
 DenseConnection( Thalamus_mot('V'), Cortex_mot('I'),    1.0 )
 DenseConnection( Cortex_cog('V'),   Thalamus_cog('I'),  0.4 )
 DenseConnection( Cortex_mot('V'),   Thalamus_mot('I'),  0.4 )
-
-DenseConnection( SNc_dop('V'),   Striatum_cog('DA'),       1.0 )
-DenseConnection( SNc_dop('V'),   Striatum_mot('DA'),       1.0 )
-DenseConnection( SNc_dop('V'),   Striatum_ass('DA'),       1.0 )
-
-# Initial DA levels
-# -----------------------------------------------------------------------------
-# Unnecessary now, DA comes from SNc
-# setDAlevels(DA)
+DenseConnection( SNc_dop('V'),      Striatum_cog('DA'), 1.0 )
+DenseConnection( SNc_dop('V'),      Striatum_mot('DA'), 1.0 )
+DenseConnection( SNc_dop('V'),      Striatum_ass('DA'), 1.0 )
 
 # Trial setup
 # -----------------------------------------------------------------------------
@@ -646,9 +652,9 @@ def computeSoftInput(t):
     #     Cortex_ass['Iext'][c2,m2] = v + inputCurrents_noise[5]  
     # else if n_availableOptions == n:
     for i in range(n_availableOptions):
-        Cortex_mot['Iext'][0,i]  = v + inputCurrents_noise[i*3]
-        Cortex_cog['Iext'][i,0]  = v + inputCurrents_noise[i*3+1]
-        Cortex_ass['Iext'][i,i] = v + inputCurrents_noise[i*3+2]
+        Cortex_mot['Iext'][0          ,cues_mot[i]] = v + inputCurrents_noise[i*3]
+        Cortex_cog['Iext'][cues_cog[i],0          ] = v + inputCurrents_noise[i*3+1]
+        Cortex_ass['Iext'][cues_cog[i],cues_mot[i]] = v + inputCurrents_noise[i*3+2]
 
 @clock.at(3000*millisecond)
 def unset_trial(t):
@@ -847,7 +853,7 @@ def register(t):
             mchoice = m2
         else:
             if doPrint:
-                print "! Failed trial: selected a non-presented cue (not ",m1,"nor",m2,"but",motor_choice,")"
+                print "! Failed trial: selected a non-presented cue (not ",m1,"nor",m2,"but",mot_choice,")"
             reset()
             selectionError += 1
             if not forceSelection:
@@ -865,8 +871,10 @@ def register(t):
 
         # How good was the selection compared to the best choice presented
         regret = np.max([cues_reward[choice],cues_reward[nchoice]]) - cues_reward[choice]
+        perceived_regret = np.max([cog_cues_value[choice],cog_cues_value[nchoice]]) - cog_cues_value[choice]
         # advantage = 1 + (cues_reward[choice] - np.max([cues_reward[choice],cues_reward[nchoice]]))
         advantage = 1 - regret
+        perceived_advantage = 1 - perceived_regret
         A.append(advantage)
         Regret.append(regret)
         cumRegret += regret
@@ -891,12 +899,18 @@ def register(t):
 
         # How good was the selection compared to the best choice presented
         regret = np.max(cues_reward) - cues_reward[choice]
+        perceived_regret = np.max(cog_cues_value) - cog_cues_value[choice]
         # advantage = 1 + (cues_reward[choice] - np.max([cues_reward[choice],cues_reward[nchoice]]))
         advantage = 1 - regret
+        perceived_advantage = 1 - perceived_regret
         A.append(advantage)
         Regret.append(regret)
         cumRegret += regret
-        probChoice[choice][currentTrial%probChoiceBuffSize] = 1
+        for c in cues_cog:
+            if c == choice:
+                probChoice[c][currentTrial%probChoiceBuffSize] = 1
+            else:
+                probChoice[c][currentTrial%probChoiceBuffSize] = 0
 
 
     W = W_cortex_cog_to_striatum_cog
@@ -907,7 +921,8 @@ def register(t):
         R.append(reward)
         smoothR = alpha_SuccessEMA * smoothR + (1-alpha_SuccessEMA) * reward
         if dynamicDA:
-            SNc_dop['SNc_h'] = SNc_h_base - gamma_DAbySuccess * smoothR
+            # SNc_dop['SNc_h'] = SNc_h_base - gamma_DAbySuccess * smoothR
+            SNc_dop['SNc_h'] = SNc_h_base - gamma_DAbySuccess * perceived_advantage
 
         # Compute prediction error
         pError = reward - cog_cues_value[choice]
@@ -926,13 +941,11 @@ def register(t):
             W_cortex_cog_to_striatum_cog._weights -= alpha_LTD
 
     if doPrint:
-        # Just for displaying ordered cue
         if not garivierMoulines:
             if P[-1]:
                 print "Choice:            [%d] / %d  (good)" % (choice,nchoice)
             else:
                 print "Choice:              %d / [%d] (bad)" % (nchoice,choice)
-                
         else:
             if P[-1]:
                 print "Choice:            [%d]  (good)" % (choice)
@@ -948,6 +961,7 @@ def register(t):
             print "Motor weights:     ", np.diag(Wm._weights)
             print "Cognitive values:  ", cog_cues_value
             print "Choices prob:      ",'  '.join(['{:.2f}'.format(np.nanmean(i)) for i in probChoice])
+            print "Reward  prob:      ",'  '.join(['{:.2f}'.format(i) for i in cues_reward])
 
     if STORE_DATA and not completeTrials:
         printData()
@@ -965,7 +979,7 @@ def register(t):
 
 if neuralPlot:
     cogMarker = motMarker = movMarker = []
-    plotSteps = 100*millisecond
+    plotSteps = 1*millisecond
     nData = 2*n
     nData2 = 2*n
     nDataSnc = 1
@@ -1004,9 +1018,9 @@ if neuralPlot:
 
     axstr.set_ylim(-2,25)
     axstr.set_title('Striatal activity', fontsize=10)
-    axctx.set_ylim(-2,100)
+    axctx.set_ylim(-2,80)
     axctx.set_title('Cortical activity', fontsize=10)
-    axsnc.set_ylim(-10,20)
+    axsnc.set_ylim(-2,20)
     axsnc.set_title('SNc activity', fontsize=10)
     axpptn.set_ylim(-15,15)
     axpptn.set_title('PPTN activity', fontsize=10)
@@ -1066,11 +1080,11 @@ if neuralPlot:
 
     axstr_ass.set_ylim(-2,25)
     axstr_ass.set_title('Associative striatal activity', fontsize=10)
-    axgpi.set_ylim(-2,200)
+    axgpi.set_ylim(-2,150)
     axgpi.set_title('GPi activity', fontsize=10)
-    axstn.set_ylim(-2,100)
+    axstn.set_ylim(-2,80)
     axstn.set_title('STN activity', fontsize=10)
-    axth.set_ylim(-2,100)
+    axth.set_ylim(-2,80)
     axth.set_title('Th activity', fontsize=10)
 
     neuralData_yr1 = np.full((len(neuralData_x),nrData),None,dtype=float)
@@ -1133,30 +1147,6 @@ if neuralPlot:
     addLegend(axstn,neuralSignalsr3)
     addLegend(axth,neuralSignalsTh)
     addLegend(axpptn,neuralSignalsPptn,['I_r','I_rew','Ie_rew'])
-    ## axstr.legend(flip(neuralSignals,n),flip(labels,n),loc='upper right', ncol=n, fontsize='x-small', # bbox_to_anchor= (1.08, 0.5), 
-    ##         borderaxespad=0, frameon=False)
-    ## axstr_is.legend(flip(neuralSignals_per,n),flip(labels,n),loc='upper right', ncol=n, fontsize='x-small', # bbox_to_anchor= (1.08, 0.5), 
-    ##         borderaxespad=0, frameon=False)
-    ## axstr_th.legend(flip(neuralSignals_str_th,n),flip(labels,n),loc='upper right', ncol=n, fontsize='x-small', # bbox_to_anchor= (1.08, 0.5), 
-    ##         borderaxespad=0, frameon=False)
-    #axsnct.legend(flip(neuralSignals_2,n),flip(['SNc'],n),loc='upper right', ncol=n, fontsize='x-small', # bbox_to_anchor= (1.08, 0.1), # (1.18, 0.5), 
-    #        borderaxespad=0, frameon=False)
-    ## axctx.legend(flip(neuralSignals2,n),flip(labels,n),loc='upper right', ncol=n, fontsize='x-small',framealpha=0.6, # bbox_to_anchor= (1.08, 0.5), #ncol=2, # bbox_to_anchor= (1.2, 0.5), 
-    ##         borderaxespad=0, frameon=False)
-    ## axsnc.legend(flip(neuralSignals3+neuralSignals3_2+neuralSignals_2,3),flip(['DA','tonicDA','I_DA/5']+['I_r','I_rew','Ie_rew']+['SNc'],3),loc='upper right', ncol=3, fontsize='x-small',framealpha=0.6, # bbox_to_anchor= (1.08, 0.5), # (1.12, 0.5), 
-    ##         borderaxespad=0, frameon=False)
-    #axrwd.legend(flip(neuralSignals3_2,n),flip(['I_r','I_rew','Ie_rew'],n),loc='upper right', ncol=n, fontsize='x-small',framealpha=0.6, # bbox_to_anchor= (1.08, 0.2), # (1.2, 0.5), 
-    #        borderaxespad=0, frameon=False)
-    ## axw.legend(flip(neuralSignals4,n),flip(['Wcog['+str(i)+']' for i in cues_cog],n),loc='upper right', ncol=n, fontsize='x-small',framealpha=0.6, # bbox_to_anchor= (1.08, 0.5), #(1.14, 0.5), 
-    ##         borderaxespad=0, frameon=False)
-    ## axv.legend(flip(neuralSignals5,n),flip(['Vcog['+str(i)+']' for i in cues_cog]+['Selection']+['Not selected'],n),loc='upper right', ncol=n, fontsize='x-small',framealpha=0.6, # bbox_to_anchor= (1.08, 0.5), # bbox_to_anchor= (1.15, 0.5), 
-    ##         borderaxespad=0, frameon=False)
-    ## axstr_ass.legend(flip(neuralSignalsr1,n),flip(['Ass'+str(i)+'_'+str(j) for j in range(n) for i in range(n)],n),loc='upper right', fontsize='x-small', #bbox_to_anchor= (1.1, 0.5), 
-    ##     borderaxespad=0, frameon=False, ncol=n)
-    ## axgpi.legend(flip(neuralSignalsr2,n),flip(labels,n),loc='upper right', ncol=n, fontsize='x-small', # bbox_to_anchor= (1.08, 0.5), 
-    ##     borderaxespad=0, frameon=False)
-    ## axstn.legend(flip(neuralSignalsr3,n),flip(labels,n),loc='upper right', ncol=n, fontsize='x-small', # bbox_to_anchor= (1.08, 0.5), 
-    ##     borderaxespad=0, frameon=False)
 
     fig.tight_layout()
     fig2.tight_layout()
@@ -1291,16 +1281,9 @@ while currentTrial < nbTrials:
 
     partialReset()
 
-    if len(invertAt) and currentTrial in invertAt:
-          # print cues_reward
-          # print cues_rewards
-          # print invertAt<currentTrial
-          # print np.sum(invertAt<currentTrial)
-          # print cues_rewards[np.sum(invertAt<currentTrial)]
-          cues_reward = cues_rewards[np.sum(invertAt<currentTrial)]
-          # print cues_reward
-          # cues_reward = np.flipud(cues_reward)
-          # invertAt = 0
+    if len(invertAt) and (currentTrial+1) in invertAt:
+          cues_reward = cues_rewards[np.sum(invertAt<=(currentTrial+1))]
+
     run(time=duration, dt=dt)
 
     if clock.time >= duration:
@@ -1317,7 +1300,8 @@ while currentTrial < nbTrials:
         if not motDecision:
             # Detection and counting of failed trials
             if doPrint:
-                print "Failed trial!! ",cues_cog[:2]
+                print "Failed trial!! presenting cues:"
+                print cues_cog if garivierMoulines else cues_cog[:2]
             failedTrials += 1
             continuousFailedTrials += 1
 

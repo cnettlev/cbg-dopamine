@@ -14,7 +14,7 @@ parser.add_option("-b", "--baseNumber", dest="bN", default=0, type="int",
 parser.add_option("-f", "--folder", dest="folder", default='',
                   help="Self-explained.")
 parser.add_option("-F", "--firstDynamic", dest="fD", action="store_true", default=False,
-                  help="Self-explained.")
+                  help="First set includes dynamic dopamine.")
 parser.add_option("--flashPlots", dest="fP", default=10, type="int",
                   help="Plot every fP.")
 parser.add_option("-l","--logFile", dest="lF", action="store_true", default=False,
