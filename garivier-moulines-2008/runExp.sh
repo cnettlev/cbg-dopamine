@@ -1,6 +1,6 @@
 #!/bin/bash
 
-expName=garivier
+expName=noise35_pAdv_sat
 
 HN=`hostname`
 
@@ -26,17 +26,14 @@ echo
 
 mkdir -p "$folder"
 
+cp $0 $folder/$0
+
 tab=" --tab"
 options=()
 
 
-cmds[1]="python parallel-learning.py -l -f $folder -t 1 -n 1 -P -a \" -S -d 4.0 --dynamicDA --garivierMoulines \""
-
-# cmds[2]="python parallel-learning.py -l -f $folder -t 5 -n 2 -a \" -S -d 4.0 --garivierMoulines\""
-# 
-# cmds[3]="python parallel-learning.py -l -f $folder -t 5 -n 2 -a \" -S -d 6.0 --garivierMoulines\""
-# 
-# cmds[4]="python parallel-learning.py -l -f $folder -t 5 -n 2 -a \" -S -d 8.0 --garivierMoulines\""
+# cmds[1]="python parallel-learning.py -l -f $folder -t 100 -n 20 -P --storePlots 5 -a \" -d 4.0 --dynamicDA  --pAdvantage  \""
+cmds[1]="python parallel-learning.py -l -f $folder -t 1 -n 20 -P --storePlots 120 -a \" -d 4.0 --dynamicDA  --pAdvantage  \""
 
 
 for cmd in "${cmds[@]}"; do
@@ -49,4 +46,4 @@ else
 	gnome-terminal "${options[@]}"
 fi
 
-exit 0
+# exit 0

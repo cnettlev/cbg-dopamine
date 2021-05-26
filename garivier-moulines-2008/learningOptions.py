@@ -46,6 +46,8 @@ parser.add_option("-p", "--regPattern", dest="useRegularPattern", action="store_
                   help="Sets the presentation of specific pair of cues in order to produce a controlled number of presentations for each combination.")
 parser.add_option("-P", "--activityPlots", dest="plotting", action="store_true", default=False,
                   help="Activates the presentation of plots with neural activity at every trial.")
+parser.add_option("--pAdvantage", dest="dynamicDAoverA", action="store_true", default=False,
+                  help="If dynamic DA is active, SNc activity variates following a perceived advantage.", metavar="PADV")
 parser.add_option("--pasquereau", dest="pasquereau", action="store_true", default=False,
                   help="Sets task according to Pasquereau 2007.", metavar="PASQ")
 parser.add_option("--pausePlots", dest="pPlots", action="store_true", default=False,
@@ -117,17 +119,17 @@ constantLTD = options.cLTD
 oneStepConstantLTD = options.oScLTD
 applyInMotorLoop = options.applyInMotorLoop
 regPattern = options.useRegularPattern
-neuralPlot = options.plotting or (flashPlots>=0)
-if neuralPlot and flashPlots == -1:
-      flashPlots = 0
-pausePlots = options.pPlots
 storePlotsEvery = options.savePlots
+neuralPlot = options.plotting or (flashPlots>=0) or (storePlotsEvery>=0)
+# if neuralPlot and flashPlots == -1:
+#       flashPlots = 0
+pausePlots = options.pPlots
 if storePlotsEvery > 0:
-      if flashPlots > 0 and (storePlotsEvery%flashPlots)!=0:
-            print "Error: Trying to store plots withouth being draw",storePlotsEvery%flashPlots
-            print "Draw every",flashPlots
-            print "Store every",storePlotsEvery
-            exit()
+      # if flashPlots > 0 and (storePlotsEvery%flashPlots)!=0:
+      #       print "Error: Trying to store plots withouth being draw",storePlotsEvery%flashPlots
+      #       print "Draw every",flashPlots
+      #       print "Store every",storePlotsEvery
+      #       exit()
       plotsFolder = folder+'neuralPlots/'
       createUnexistentFolder(plotsFolder)
 learn = not options.disableLearning
@@ -151,3 +153,6 @@ aux_Y = options.parY
 Weights_N = options.wnoise
 garivierMoulines = options.garivierMoulines
 pasquereau = options.pasquereau
+
+dynamicDAoverA = options.dynamicDAoverA
+minSmoothA = 0.6

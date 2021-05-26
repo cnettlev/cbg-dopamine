@@ -7,7 +7,7 @@ import numpy as np
 from time import sleep
 from parallelOptions import options
 
-additionalOptions = ' --ltd-constant --relativeValue --garivierMoulines -S ' + options.aP
+additionalOptions = ' --ltd-constant --relativeValue -S ' + options.aP
 
 parallelDivisions = options.pD
 
@@ -16,7 +16,7 @@ logFile = options.lF
 plotNeuralData = options.pN
 
 firstDynamic = options.fD
-DA_DIV = np.array([4.0, 4.0, 6.0, 8.0])
+DA_DIV = np.array([4.0])#, 4.0, 6.0, 8.0])
 DIVISIONS = DA_DIV.shape[0]
 TIMES = options.t
 baseNumber = options.bN
@@ -75,7 +75,8 @@ def addPlotting(processes):
     processes = createList(processes)
     output = []
     for p in processes:
-        output.append(p+' --flashPlots '+str(options.fP)+' --storePlots '+str(options.sP))
+        # output.append(p+' --flashPlots '+str(options.fP)+' --storePlots '+str(options.sP))
+        output.append(p+' --storePlots '+str(options.sP))
     return output
 
 def runProcess(process):

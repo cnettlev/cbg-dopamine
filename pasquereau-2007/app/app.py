@@ -17,8 +17,8 @@ user = 'no-one'
 cues = list(range(4))
 pos  = list(range(4))
 prob = [0.0,0.33,0.66,1.0]
-N = 38
-maxTrial = 200
+N = 39
+maxTrial = 2
 
 selection = OrderedDict([('user',user),('yold',''),('trial',0),('selection',''),('cue_a',''),('cue_b',''),('pos_a',''),('pos_b',''),('success',''),('reward',''),('time',0),('reverse',0)])
 
@@ -55,7 +55,7 @@ def copy(filename,gfolder):
 @app.route("/")
 def hello():
     img_start = randint(0,N)
-    figures = [str(i+img_start%N)+'.png' for i in cues]
+    figures = [str((i+img_start)%N)+'.png' for i in cues]
     shuffle(figures)
 
     resp = make_response(render_template('start.html',cues=figures))
@@ -65,7 +65,7 @@ def hello():
         wtr = csv.DictWriter(records, selection.keys(),delimiter=',')
         wtr.writeheader()
 
-    resp.set_cookie('reverse', str(100 + randint(-20,20)))
+    resp.set_cookie('reverse', str(60 + randint(-10,10)))
     resp.set_cookie('trial', '0')
     resp.set_cookie('filename', filename)
     for i in range(len(figures)):

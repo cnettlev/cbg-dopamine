@@ -15,7 +15,7 @@ parser.add_option("-f", "--folder", dest="folder", default='',
                   help="Self-explained.")
 parser.add_option("-F", "--firstDynamic", dest="fD", action="store_true", default=False,
                   help="First set includes dynamic dopamine.")
-parser.add_option("--flashPlots", dest="fP", default=10, type="int",
+parser.add_option("--flashPlots", dest="fP", default=50, type="int",
                   help="Plot every fP.")
 parser.add_option("-l","--logFile", dest="lF", action="store_true", default=False,
                   help="Enables logfiles")
@@ -25,7 +25,7 @@ parser.add_option("-p", "--parallelDivisions", dest="pD", action="store_true", d
                   help="Parallelize by dopamine activity.")
 parser.add_option("-P", "--plotNeuralData", dest="pN", action="store_true", default=False,
                   help="Self-explained.")
-parser.add_option("--storePlots", dest="sP", default=10, type="int",
+parser.add_option("--storePlots", dest="sP", default=50, type="int",
                   help="Store plots every fP.")
 parser.add_option("-t", "--times", type="int", dest="t", default=1,
                   help="Self-explained.")
