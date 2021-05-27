@@ -1,0 +1,405 @@
+Cognitive weights:  [0.50005664 0.49996869 0.49942953 0.49958883]
+Trial:  0 . Failed trials:  0
+Smooth advantage:  0.06666666666666664  [ sat - 0.0 ]
+Choice:              0 / [2] (bad)
+Reward ( 33%) :     1 / 0.200000
+SNc_h :             [-4.]
+Mean performance:   0.0
+Mean reward:        1.000
+Response time:      1449 ms
+Cognitive weights:  [0.5000183  0.50146136 0.49749267 0.50084409]
+Motor weights:      [0.49983243 0.50009491 0.49975341 0.5004383 ]
+Cognitive values:   [0.5 0.5 0.6 0.5]
+Choices prob:       0.50  0.40  0.50  0.50  0.50  0.50
+Reward  prob:       1.00  0.67  0.33  0.00
+
+Trial:  1 . Failed trials:  0
+Smooth advantage:  0.11999999999999995  [ sat - 0.0 ]
+Choice:              0 / [2] (bad)
+Reward ( 33%) :     0 / 0.160000
+SNc_h :             [-4.]
+Mean performance:   0.0
+Mean reward:        0.500
+Response time:      1499 ms
+Cognitive weights:  [0.50688656 0.49976817 0.51832745 0.50621702]
+Motor weights:      [0.49983243 0.50009491 0.49975341 0.5004383 ]
+Cognitive values:   [0.5  0.5  0.48 0.5 ]
+Choices prob:       0.50  0.30  0.50  0.50  0.50  0.50
+Reward  prob:       1.00  0.67  0.33  0.00
+
+Trial:  2 . Failed trials:  0
+Smooth advantage:  0.16266666666666663  [ sat - 0.0 ]
+Choice:              0 / [2] (bad)
+Reward ( 33%) :     0 / 0.128000
+SNc_h :             [-4.]
+Mean performance:   0.0
+Mean reward:        0.333
+Response time:      1249 ms
+Cognitive weights:  [0.50358515 0.50119659 0.51833554 0.50788664]
+Motor weights:      [0.49983243 0.50009491 0.49975341 0.5004383 ]
+Cognitive values:   [0.5   0.5   0.384 0.5  ]
+Choices prob:       0.50  0.20  0.50  0.50  0.50  0.50
+Reward  prob:       1.00  0.67  0.33  0.00
+
+Trial:  3 . Failed trials:  0
+Smooth advantage:  0.2634666666666666  [ sat - 0.0 ]
+Choice:              2 / [3] (bad)
+Reward (  0%) :     0 / 0.102400
+SNc_h :             [-4.]
+Mean performance:   0.0
+Mean reward:        0.250
+Response time:      1049 ms
+Cognitive weights:  [0.50650848 0.49706748 0.51711505 0.50583193]
+Motor weights:      [0.49983243 0.50009491 0.49975341 0.5004383 ]
+Cognitive values:   [0.5   0.5   0.384 0.4  ]
+Choices prob:       0.50  0.20  0.50  0.50  0.50  0.40
+Reward  prob:       1.00  0.67  0.33  0.00
+
+Trial:  4 . Failed trials:  0
+Smooth advantage:  0.27743999999999996  [ sat - 0.0 ]
+Choice:              1 / [3] (bad)
+Reward (  0%) :     0 / 0.081920
+SNc_h :             [-4.]
+Mean performance:   0.0
+Mean reward:        0.200
+Response time:      1799 ms
+Cognitive weights:  [0.50472691 0.4956092  0.5206243  0.50212103]
+Motor weights:      [0.49983243 0.50009491 0.49975341 0.5004383 ]
+Cognitive values:   [0.5   0.5   0.384 0.32 ]
+Choices prob:       0.50  0.20  0.50  0.50  0.40  0.40
+Reward  prob:       1.00  0.67  0.33  0.00
+
+Trial:  5 . Failed trials:  0
+Smooth advantage:  0.3552853333333333  [ sat - 0.0 ]
+Choice:              0 / [1] (bad)
+Reward ( 66%) :     1 / 0.265536
+SNc_h :             [-4.]
+Mean performance:   0.0
+Mean reward:        0.333
+Response time:      1299 ms
+Cognitive weights:  [0.49888117 0.49533188 0.5199842  0.49677276]
+Motor weights:      [0.49983243 0.50009491 0.49975341 0.5004383 ]
+Cognitive values:   [0.5   0.6   0.384 0.32 ]
+Choices prob:       0.50  0.20  0.50  0.50  0.40  0.40
+Reward  prob:       1.00  0.67  0.33  0.00
+
+Trial:  6 . Failed trials:  0
+Smooth advantage:  0.35089493333333327  [ sat - 0.0 ]
+Choice:              0 / [2] (bad)
+Reward ( 33%) :     0 / 0.212429
+SNc_h :             [-4.]
+Mean performance:   0.0
+Mean reward:        0.286
+Response time:      1249 ms
+Cognitive weights:  [0.50799645 0.50450062 0.51997662 0.49585646]
+Motor weights:      [0.49983243 0.50009491 0.49975341 0.5004383 ]
+Cognitive values:   [0.5    0.6    0.3072 0.32  ]
+Choices prob:       0.50  0.20  0.50  0.50  0.40  0.40
+Reward  prob:       1.00  0.67  0.33  0.00
+
+Trial:  7 . Failed trials:  0
+Smooth advantage:  0.34738261333333326  [ sat - 0.0 ]
+Choice:              1 / [3] (bad)
+Reward (  0%) :     0 / 0.169943
+SNc_h :             [-4.]
+Mean performance:   0.0
+Mean reward:        0.250
+Response time:      1399 ms
+Cognitive weights:  [0.50859042 0.50209003 0.51851109 0.49327794]
+Motor weights:      [0.49983243 0.50009491 0.49975341 0.5004383 ]
+Cognitive values:   [0.5    0.6    0.3072 0.256 ]
+Choices prob:       0.50  0.20  0.50  0.50  0.40  0.40
+Reward  prob:       1.00  0.67  0.33  0.00
+
+Trial:  8 . Failed trials:  0
+Smooth advantage:  0.34457275733333326  [ sat - 0.0 ]
+Choice:              0 / [2] (bad)
+Reward ( 33%) :     1 / 0.335954
+SNc_h :             [-4.]
+Mean performance:   0.0
+Mean reward:        0.333
+Response time:      2149 ms
+Cognitive weights:  [0.50807767 0.49915314 0.51897697 0.49688705]
+Motor weights:      [0.49983243 0.50009491 0.49975341 0.5004383 ]
+Cognitive values:   [0.5     0.6     0.44576 0.256  ]
+Choices prob:       0.50  0.20  0.50  0.50  0.40  0.40
+Reward  prob:       1.00  0.67  0.33  0.00
+
+Trial:  9 . Failed trials:  0
+Smooth advantage:  0.4756582058666666  [ sat - 0.0 ]
+Choice:            [0] / 2  (good)
+Reward (100%) :     1 / 0.468764
+SNc_h :             [-4.]
+Mean performance:   0.1
+Mean reward:        0.400
+Response time:      1000 ms
+Cognitive weights:  [0.5221993  0.50046671 0.5221585  0.49958234]
+Motor weights:      [0.49983243 0.50009491 0.49975341 0.5004383 ]
+Cognitive values:   [0.6     0.6     0.44576 0.256  ]
+Choices prob:       0.50  0.30  0.50  0.50  0.40  0.40
+Reward  prob:       1.00  0.67  0.33  0.00
+
+Trial:  10 . Failed trials:  0
+Smooth advantage:  0.5805265646933333  [ sat - 0.0 ]
+Choice:            [0] / 3  (good)
+Reward (100%) :     1 / 0.575011
+SNc_h :             [-4.]
+Mean performance:   0.18181818181818182
+Mean reward:        0.455
+Response time:      1049 ms
+Cognitive weights:  [0.53317375 0.50537235 0.52501984 0.50330337]
+Motor weights:      [0.49983243 0.50009491 0.49975341 0.5004383 ]
+Cognitive values:   [0.68    0.6     0.44576 0.256  ]
+Choices prob:       0.50  0.30  0.50  0.50  0.40  0.40
+Reward  prob:       1.00  0.67  0.33  0.00
+
+Trial:  11 . Failed trials:  0
+Smooth advantage:  0.6644212517546666  [ sat - 0.16105312938666655 ]
+Choice:            [0] / 1  (good)
+Reward (100%) :     1 / 0.660009
+SNc_h :             [-4.64421252]
+Mean performance:   0.25
+Mean reward:        0.500
+Response time:      1599 ms
+Cognitive weights:  [0.54896905 0.50172023 0.52584063 0.50558542]
+Motor weights:      [0.49983243 0.50009491 0.49975341 0.5004383 ]
+Cognitive values:   [0.744   0.6     0.44576 0.256  ]
+Choices prob:       0.50  0.30  0.50  0.50  0.40  0.40
+Reward  prob:       1.00  0.67  0.33  0.00
+
+Trial:  12 . Failed trials:  0
+Smooth advantage:  0.7315370014037332  [ sat - 0.32884250350933314 ]
+Choice:            [2] / 3  (good)
+Reward ( 33%) :     0 / 0.528007
+SNc_h :             [-5.31537001]
+Mean performance:   0.3333333333333333
+Mean reward:        0.462
+Response time:      1099 ms
+Cognitive weights:  [0.54551026 0.50184571 0.52720625 0.49944541]
+Motor weights:      [0.49983243 0.50009491 0.49975341 0.5004383 ]
+Cognitive values:   [0.744    0.6      0.356608 0.256   ]
+Choices prob:       0.50  0.30  0.50  0.50  0.40  0.40
+Reward  prob:       1.00  0.67  0.33  0.00
+
+Trial:  13 . Failed trials:  0
+Smooth advantage:  0.7852296011229866  [ sat - 0.46307400280746647 ]
+Choice:            [0] / 3  (good)
+Reward (100%) :     1 / 0.622406
+SNc_h :             [-5.85229601]
+Mean performance:   0.4166666666666667
+Mean reward:        0.500
+Response time:      2349 ms
+Cognitive weights:  [0.54324458 0.50367517 0.52581291 0.49965418]
+Motor weights:      [0.49983243 0.50009491 0.49975341 0.5004383 ]
+Cognitive values:   [0.7952   0.6      0.356608 0.256   ]
+Choices prob:       0.50  0.30  0.50  0.50  0.40  0.40
+Reward  prob:       1.00  0.67  0.33  0.00
+
+Trial:  14 . Failed trials:  0
+Smooth advantage:  0.8281836808983892  [ sat - 0.5704592022459731 ]
+Choice:            [0] / 1  (good)
+Reward (100%) :     1 / 0.697924
+SNc_h :             [-6.28183681]
+Mean performance:   0.5
+Mean reward:        0.533
+Response time:      1499 ms
+Cognitive weights:  [0.54345617 0.50184179 0.52335521 0.50386677]
+Motor weights:      [0.49983243 0.50009491 0.49975341 0.5004383 ]
+Cognitive values:   [0.83616  0.6      0.356608 0.256   ]
+Choices prob:       0.50  0.30  0.50  0.50  0.40  0.40
+Reward  prob:       1.00  0.67  0.33  0.00
+
+Trial:  15 . Failed trials:  0
+Smooth advantage:  0.8625469447187114  [ sat - 0.6563673617967786 ]
+Choice:            [0] / 3  (good)
+Reward (100%) :     1 / 0.758340
+SNc_h :             [-6.62546945]
+Mean performance:   0.5833333333333334
+Mean reward:        0.562
+Response time:      1249 ms
+Cognitive weights:  [0.54504399 0.4965054  0.51715866 0.50277317]
+Motor weights:      [0.49983243 0.50009491 0.49975341 0.5004383 ]
+Cognitive values:   [0.868928 0.6      0.356608 0.256   ]
+Choices prob:       0.50  0.30  0.60  0.50  0.40  0.40
+Reward  prob:       1.00  0.67  0.33  0.00
+
+Trial:  16 . Failed trials:  0
+Smooth advantage:  0.8900375557749691  [ sat - 0.7250938894374228 ]
+Choice:            [0] / 2  (good)
+Reward (100%) :     1 / 0.806672
+SNc_h :             [-6.90037556]
+Mean performance:   0.6666666666666666
+Mean reward:        0.588
+Response time:      1149 ms
+Cognitive weights:  [0.54945072 0.49816035 0.51557932 0.51000905]
+Motor weights:      [0.49983243 0.50009491 0.49975341 0.5004383 ]
+Cognitive values:   [0.8951424 0.6       0.356608  0.256    ]
+Choices prob:       0.50  0.40  0.60  0.50  0.40  0.40
+Reward  prob:       1.00  0.67  0.33  0.00
+
+Trial:  17 . Failed trials:  0
+Smooth advantage:  0.9120300446199753  [ sat - 0.7800751115499382 ]
+Choice:            [2] / 3  (good)
+Reward ( 33%) :     0 / 0.645337
+SNc_h :             [-7.12030045]
+Mean performance:   0.75
+Mean reward:        0.556
+Response time:      1299 ms
+Cognitive weights:  [0.54270033 0.49859263 0.51458751 0.51067825]
+Motor weights:      [0.49983243 0.50009491 0.49975341 0.5004383 ]
+Cognitive values:   [0.8951424 0.6       0.2852864 0.256    ]
+Choices prob:       0.50  0.40  0.60  0.50  0.40  0.50
+Reward  prob:       1.00  0.67  0.33  0.00
+
+Trial:  18 . Failed trials:  0
+Smooth advantage:  0.9296240356959802  [ sat - 0.8240600892399504 ]
+Choice:            [0] / 3  (good)
+Reward (100%) :     1 / 0.716270
+SNc_h :             [-7.29624036]
+Mean performance:   0.8333333333333334
+Mean reward:        0.579
+Response time:      2649 ms
+Cognitive weights:  [0.53888363 0.49209302 0.51156544 0.50616096]
+Motor weights:      [0.49983243 0.50009491 0.49975341 0.5004383 ]
+Cognitive values:   [0.91611392 0.6        0.2852864  0.256     ]
+Choices prob:       0.50  0.40  0.70  0.50  0.40  0.50
+Reward  prob:       1.00  0.67  0.33  0.00
+
+Trial:  19 . Failed trials:  0
+Smooth advantage:  0.9436992285567841  [ sat - 0.8592480713919604 ]
+Choice:            [0] / 1  (good)
+Reward (100%) :     1 / 0.773016
+SNc_h :             [-7.43699229]
+Mean performance:   0.9166666666666666
+Mean reward:        0.600
+Response time:      1349 ms
+Cognitive weights:  [0.54721178 0.49322065 0.51039944 0.50706755]
+Motor weights:      [0.49983243 0.50009491 0.49975341 0.5004383 ]
+Cognitive values:   [0.93289114 0.6        0.2852864  0.256     ]
+Choices prob:       0.60  0.40  0.70  0.50  0.40  0.50
+Reward  prob:       1.00  0.67  0.33  0.00
+
+Trial:  20 . Failed trials:  0
+Smooth advantage:  0.9549593828454273  [ sat - 0.8873984571135681 ]
+Choice:            [0] / 3  (good)
+Reward (100%) :     1 / 0.818413
+SNc_h :             [-7.54959383]
+Mean performance:   1.0
+Mean reward:        0.619
+Response time:      1449 ms
+Cognitive weights:  [0.54616116 0.49512036 0.51324873 0.50932877]
+Motor weights:      [0.49983243 0.50009491 0.49975341 0.5004383 ]
+Cognitive values:   [0.94631291 0.6        0.2852864  0.256     ]
+Choices prob:       0.60  0.40  0.70  0.50  0.40  0.50
+Reward  prob:       1.00  0.67  0.33  0.00
+
+Trial:  21 . Failed trials:  0
+Smooth advantage:  0.8306341729430085  [ sat - 0.5765854323575211 ]
+Choice:              1 / [3] (bad)
+Reward (  0%) :     0 / 0.654730
+SNc_h :             [-6.30634173]
+Mean performance:   0.9166666666666666
+Mean reward:        0.591
+Response time:      2799 ms
+Cognitive weights:  [0.54584002 0.49237137 0.50903695 0.50488456]
+Motor weights:      [0.49983243 0.50009491 0.49975341 0.5004383 ]
+Cognitive values:   [0.94631291 0.6        0.2852864  0.2048    ]
+Choices prob:       0.60  0.40  0.70  0.50  0.30  0.50
+Reward  prob:       1.00  0.67  0.33  0.00
+
+Trial:  22 . Failed trials:  0
+Smooth advantage:  0.8645073383544067  [ sat - 0.6612683458860169 ]
+Choice:            [0] / 1  (good)
+Reward (100%) :     1 / 0.723784
+SNc_h :             [-6.64507338]
+Mean performance:   0.9166666666666666
+Mean reward:        0.609
+Response time:      1649 ms
+Cognitive weights:  [0.54815529 0.49108642 0.51024918 0.50345835]
+Motor weights:      [0.49983243 0.50009491 0.49975341 0.5004383 ]
+Cognitive values:   [0.95705033 0.6        0.2852864  0.2048    ]
+Choices prob:       0.60  0.40  0.70  0.50  0.30  0.50
+Reward  prob:       1.00  0.67  0.33  0.00
+
+Trial:  23 . Failed trials:  0
+Smooth advantage:  0.8249392040168587  [ sat - 0.5623480100421469 ]
+Choice:              2 / [3] (bad)
+Reward (  0%) :     0 / 0.579027
+SNc_h :             [-6.24939204]
+Mean performance:   0.8333333333333334
+Mean reward:        0.583
+Response time:      1000 ms
+Cognitive weights:  [0.54988372 0.4914309  0.50925283 0.5014906 ]
+Motor weights:      [0.49983243 0.50009491 0.49975341 0.5004383 ]
+Cognitive values:   [0.95705033 0.6        0.2852864  0.16384   ]
+Choices prob:       0.60  0.40  0.70  0.50  0.30  0.50
+Reward  prob:       1.00  0.67  0.33  0.00
+
+Trial:  24 . Failed trials:  0
+Smooth advantage:  0.7932846965468203  [ sat - 0.48321174136705086 ]
+Choice:              1 / [2] (bad)
+Reward ( 33%) :     1 / 0.663222
+SNc_h :             [-5.93284697]
+Mean performance:   0.75
+Mean reward:        0.600
+Response time:      1049 ms
+Cognitive weights:  [0.54991824 0.48864479 0.50736263 0.49898934]
+Motor weights:      [0.49983243 0.50009491 0.49975341 0.5004383 ]
+Cognitive values:   [0.95705033 0.6        0.42822912 0.16384   ]
+Choices prob:       0.60  0.40  0.70  0.40  0.30  0.50
+Reward  prob:       1.00  0.67  0.33  0.00
+
+Trial:  25 . Failed trials:  0
+Smooth advantage:  0.8346277572374563  [ sat - 0.5865693930936408 ]
+Choice:            [0] / 2  (good)
+Reward (100%) :     1 / 0.730577
+SNc_h :             [-6.34627757]
+Mean performance:   0.75
+Mean reward:        0.615
+Response time:      2049 ms
+Cognitive weights:  [0.54845652 0.48917832 0.52583873 0.49679121]
+Motor weights:      [0.49983243 0.50009491 0.49975341 0.5004383 ]
+Cognitive values:   [0.96564026 0.6        0.42822912 0.16384   ]
+Choices prob:       0.60  0.50  0.70  0.40  0.30  0.50
+Reward  prob:       1.00  0.67  0.33  0.00
+
+Trial:  26 . Failed trials:  0
+Smooth advantage:  0.7343688724566317  [ sat - 0.3359221811415794 ]
+Choice:              1 / [3] (bad)
+Reward (  0%) :     0 / 0.584462
+SNc_h :             [-5.34368872]
+Mean performance:   0.6666666666666666
+Mean reward:        0.593
+Response time:      1299 ms
+Cognitive weights:  [0.5499229  0.48673911 0.52532243 0.49539468]
+Motor weights:      [0.49983243 0.50009491 0.49975341 0.5004383 ]
+Cognitive values:   [0.96564026 0.6        0.42822912 0.131072  ]
+Choices prob:       0.60  0.50  0.70  0.40  0.30  0.50
+Reward  prob:       1.00  0.67  0.33  0.00
+
+Trial:  27 . Failed trials:  0
+Smooth advantage:  0.7208284312986387  [ sat - 0.30207107824659685 ]
+Choice:              0 / [1] (bad)
+Reward ( 66%) :     0 / 0.467570
+SNc_h :             [-5.20828431]
+Mean performance:   0.5833333333333334
+Mean reward:        0.571
+Response time:      1199 ms
+Cognitive weights:  [0.5495901  0.48301338 0.52479847 0.49679409]
+Motor weights:      [0.49983243 0.50009491 0.49975341 0.5004383 ]
+Cognitive values:   [0.96564026 0.48       0.42822912 0.131072  ]
+Choices prob:       0.60  0.50  0.70  0.40  0.30  0.50
+Reward  prob:       1.00  0.67  0.33  0.00
+
+Trial:  28 . Failed trials:  0
+Smooth advantage:  0.7099960783722443  [ sat - 0.27499019593061086 ]
+Choice:              2 / [3] (bad)
+Reward (  0%) :     0 / 0.374056
+SNc_h :             [-5.09996078]
+Mean performance:   0.5
+Mean reward:        0.552
+Response time:      1000 ms
+Cognitive weights:  [0.54992959 0.48255185 0.52237408 0.49485108]
+Motor weights:      [0.49983243 0.50009491 0.49975341 0.5004383 ]
+Cognitive values:   [0.96564026 0.48       0.42822912 0.1048576 ]
+Choices prob:       0.60  0.50
