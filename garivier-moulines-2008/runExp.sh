@@ -1,6 +1,6 @@
 #!/bin/bash
 
-expName=noise35_pAdv_sat
+expName=noise35_adv_sat
 
 HN=`hostname`
 
@@ -33,7 +33,10 @@ options=()
 
 
 # cmds[1]="python parallel-learning.py -l -f $folder -t 100 -n 20 -P --storePlots 5 -a \" -d 4.0 --dynamicDA  --pAdvantage  \""
-cmds[1]="python parallel-learning.py -l -f $folder -t 1 -n 20 -P --storePlots 120 -a \" -d 4.0 --dynamicDA  --pAdvantage  \""
+cmds[1]="python parallel-learning.py -l -f $folder -t 100 -n 12 -P --storePlots 120 -a \" -d 4.0 --dynamicDA  --pAdvantage  \""
+cmds[2]="python parallel-learning.py -l -f $folder -t 100 -n 12 -P --storePlots 1000 -a \" -d 4.0 --garivierMoulines --pAdvantage  \""
+
+
 
 
 for cmd in "${cmds[@]}"; do

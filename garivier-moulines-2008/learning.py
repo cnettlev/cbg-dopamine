@@ -91,7 +91,7 @@ Striatum_tau = 0.01
 STN_tau      = 0.01
 GPi_tau      = 0.01
 Thalamus_tau = 0.01
-STR_N_tau    = 0.03
+STR_N_tau    = 0.035
 SNc_tau   = 0.01
 SNc_N_tau    = 0.03
 arD2_tau = .5
@@ -929,7 +929,7 @@ def register(t):
         reward = np.random.uniform(0,1) < cues_reward[choice]
         R.append(reward)
         smoothR = alpha_SuccessEMA * smoothR + (1-alpha_SuccessEMA) * reward
-        smoothA = alpha_SuccessEMA * smoothA + (1-alpha_SuccessEMA) * perceived_advantage
+        smoothA = alpha_SuccessEMA * smoothA + (1-alpha_SuccessEMA) * (perceived_advantage if usePerception else advantage)
         if dynamicDA:
             if dynamicDAoverA:
                 sSmoothA = smoothA

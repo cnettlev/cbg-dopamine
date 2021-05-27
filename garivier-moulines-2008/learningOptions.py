@@ -156,3 +156,4 @@ pasquereau = options.pasquereau
 
 dynamicDAoverA = options.dynamicDAoverA
 minSmoothA = 0.6
+usePerception = False
