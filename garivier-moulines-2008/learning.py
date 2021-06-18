@@ -116,7 +116,7 @@ gamma_eCB1_LTD    = 0.1 # (1-20)
 # Noise level (%)
 Cortex_N        =   0.01
 Striatum_N      =   0.01
-Striatum_corr_N =   N_factor * 0.5
+Striatum_corr_N =   N_factor * 0.05
 STN_N           =   0.01
 GPi_N           =   0.03
 Thalamus_N      =   0.01

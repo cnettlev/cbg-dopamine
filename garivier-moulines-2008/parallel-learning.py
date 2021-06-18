@@ -16,7 +16,7 @@ logFile = options.lF
 plotNeuralData = options.pN
 
 firstDynamic = options.fD
-DA_DIV = np.array([4.0])#, 4.0, 6.0, 8.0])
+DA_DIV = np.array([4.0, 4.0, 6.0, 8.0])
 DIVISIONS = DA_DIV.shape[0]
 TIMES = options.t
 baseNumber = options.bN
@@ -40,7 +40,7 @@ for ltd in LTD:
         STDP[index] = [ltd*STDP_factor,ltp*STDP_factor]
         index += 1
 
-NOISE = np.array([1])
+NOISE = np.array([4,5,5.5,6,7])
 
 if logFile:
     additionalOptions += ' --debug'

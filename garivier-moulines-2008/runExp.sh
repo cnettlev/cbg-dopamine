@@ -1,6 +1,6 @@
 #!/bin/bash
 
-expName=noise35_adv_sat
+expName=noise_eval
 
 HN=`hostname`
 
@@ -26,15 +26,16 @@ echo
 
 mkdir -p "$folder"
 
-cp $0 $folder/$0
+fName=`basename $0`
+cp $fName $folder/$fName
 
 tab=" --tab"
 options=()
 
 
 # cmds[1]="python parallel-learning.py -l -f $folder -t 100 -n 20 -P --storePlots 5 -a \" -d 4.0 --dynamicDA  --pAdvantage  \""
-cmds[1]="python parallel-learning.py -l -f $folder -t 100 -n 12 -P --storePlots 120 -a \" -d 4.0 --dynamicDA  --pAdvantage  \""
-cmds[2]="python parallel-learning.py -l -f $folder -t 100 -n 12 -P --storePlots 1000 -a \" -d 4.0 --garivierMoulines --pAdvantage  \""
+cmds[1]="python parallel-learning.py -l -f $folder -t 20 -n 20 -F " # -a \" -d 4.0 --dynamicDA  -N 4 \""
+# cmds[2]="python parallel-learning.py -l -f $folder -t 100 -n 12 -P --storePlots 1000 -a \" -d 4.0 --garivierMoulines --pAdvantage  \""
 
 
 
