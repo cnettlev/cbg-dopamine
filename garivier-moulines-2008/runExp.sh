@@ -34,7 +34,10 @@ options=()
 
 
 # cmds[1]="python parallel-learning.py -l -f $folder -t 100 -n 20 -P --storePlots 5 -a \" -d 4.0 --dynamicDA  --pAdvantage  \""
-cmds[1]="python parallel-learning.py -l -f $folder -t 20 -n 20 -F " # -a \" -d 4.0 --dynamicDA  -N 4 \""
+cmds[1]="python parallel-learning.py -l -f $folder -t 50 -n 10 -a \" -d 4.0 --dynamicDA \""
+cmds[2]="python parallel-learning.py -l -f $folder -t 50 -n 10  -a \" -d 4.0 \""
+cmds[3]="python parallel-learning.py -l -f $folder -t 50 -n 10  -a \" -d 6.0 \""
+cmds[4]="python parallel-learning.py -l -f $folder -t 50 -n 10  -a \" -d 8.0 \""
 # cmds[2]="python parallel-learning.py -l -f $folder -t 100 -n 12 -P --storePlots 1000 -a \" -d 4.0 --garivierMoulines --pAdvantage  \""
 
 

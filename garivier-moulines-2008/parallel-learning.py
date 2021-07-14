@@ -40,7 +40,7 @@ for ltd in LTD:
         STDP[index] = [ltd*STDP_factor,ltp*STDP_factor]
         index += 1
 
-NOISE = np.array([4,5,5.5,6,7])
+NOISE = np.array([7])
 
 if logFile:
     additionalOptions += ' --debug'
