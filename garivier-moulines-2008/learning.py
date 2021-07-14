@@ -845,6 +845,10 @@ def register(t):
     mot_choice = np.argmax(Cortex_mot['V'])
     cog_choice = np.argmax(Cortex_cog['V'])
 
+    # Compute reward
+    reward = np.random.uniform(0,1) < cues_reward[choice]
+    R.append(reward)
+
     # The motor selection is the executed one, then it
     # defines the selected cue in a cognitive domain.
     # The actual cognitive selection might differ.
@@ -880,7 +884,7 @@ def register(t):
 
         # How good was the selection compared to the best choice presented
         regret = np.max([cues_reward[choice],cues_reward[nchoice]]) - cues_reward[choice]
-        perceived_regret = np.max([cog_cues_value[choice],cog_cues_value[nchoice]]) - cog_cues_value[choice]
+        perceived_regret = np.max([cog_cues_value[choice],cog_cues_value[nchoice]]) - reward # cog_cues_value[choice]
         # advantage = 1 + (cues_reward[choice] - np.max([cues_reward[choice],cues_reward[nchoice]]))
         advantage = 1 - regret
         perceived_advantage = 1 - perceived_regret
@@ -908,7 +912,7 @@ def register(t):
 
         # How good was the selection compared to the best choice presented
         regret = np.max(cues_reward) - cues_reward[choice]
-        perceived_regret = np.max(cog_cues_value) - cog_cues_value[choice]
+        perceived_regret = np.max(cog_cues_value) - reward # cog_cues_value[choice]
         # advantage = 1 + (cues_reward[choice] - np.max([cues_reward[choice],cues_reward[nchoice]]))
         advantage = 1 - regret
         perceived_advantage = 1 - perceived_regret
@@ -925,9 +929,6 @@ def register(t):
     W = W_cortex_cog_to_striatum_cog
     Wm = W_cortex_mot_to_striatum_mot
     if learn:
-        # Compute reward
-        reward = np.random.uniform(0,1) < cues_reward[choice]
-        R.append(reward)
         smoothR = alpha_SuccessEMA * smoothR + (1-alpha_SuccessEMA) * reward
         smoothA = alpha_SuccessEMA * smoothA + (1-alpha_SuccessEMA) * (perceived_advantage if usePerception else advantage)
         if dynamicDA:
