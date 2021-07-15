@@ -155,5 +155,5 @@ garivierMoulines = options.garivierMoulines
 pasquereau = options.pasquereau
 
 dynamicDAoverA = options.dynamicDAoverA
-minSmoothA = 0.6
+minSmoothA = 0.8
 usePerception = True

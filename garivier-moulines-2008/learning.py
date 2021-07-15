@@ -120,7 +120,7 @@ Striatum_corr_N =   N_factor * 0.05
 STN_N           =   0.01
 GPi_N           =   0.03
 Thalamus_N      =   0.01
-SNc_N           =   0.1
+SNc_N           =   0.01
 # if Weights_N:
 #     Weights_N *= aux_X
 # Cortex_N        =   0.01
@@ -429,12 +429,13 @@ def convolv_D2Kernel(t,currentValue,input):
 SNc_dop   = zeros((1,1), """  D2_IPSC = - alpha_DA_arD2 * DAtoD2c;
                              Ir = np.maximum(Irew, Ie_rew);
                              I = Ir + D2_IPSC;
-                             n = correlatedNoise(I,n,SNc_N,alpha_Rew_DA,SNc_N_tau);
+                             n = noise(I,SNc_N);
                              It = I + n;
                              u = positiveClip(It - SNc_h);
                              dV/dt = (-V + u)/SNc_tau; Irew; Ie_rew; SNc_h; V_lag; DAtoD2c""")
                              # u/dt = (-u + (It - SNc_h))/SNc_tau;
                              # V = positiveClip(u); Irew; Ie_rew; SNc_h; V_lag; DAtoD2c""")
+                             # n = correlatedNoise(I,n,SNc_N,alpha_Rew_DA,SNc_N_tau);
 
 Cortex_cog   = zeros((n,1), """Is = I + Iext; 
                              n = noise(Is,Cortex_N);
@@ -1159,9 +1160,9 @@ if neuralPlot:
     def addLegend(axs,signals,labels=labels,n=n,doflip=True,loc='upper right'):
         if doflip:
             axs.legend(flip(signals,n),flip(labels,n),loc=loc, ncol=n, fontsize='x-small',
-                borderaxespad=0, frameon=False)
+                borderaxespad=0, framealpha=0.4) #frameon=False)
         else:
-            axs.legend(signals,loc=loc, ncol=n, fontsize='x-small',borderaxespad=0, frameon=False)
+            axs.legend(signals,loc=loc, ncol=n, fontsize='x-small',borderaxespad=0, framealpha=0.4) #frameon=False)
 
     # addLegend(axstr,neuralSignals)
     addLegend(axper,neuralSignals_per,['Performance','Advantage','Regret'],loc='upper left')
