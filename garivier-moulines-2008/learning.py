@@ -142,11 +142,15 @@ Vmax       = 20.0
 Vh0         = 18.18 # 18.38
 Vc         =  6.0
 
+# Tonic DA sigmoid parameters
+adv_h = 0.9
+adv_c = 0.1
+
 # Learning parameters
 decision_threshold = 30
 alpha_c     = 0.2  # 0.05
-Wmin, Wmax = 0.45, 0.55
-#Wmin, Wmax = 0.4, 0.6
+# Wmin, Wmax = 0.45, 0.55
+Wmin, Wmax = 0.4, 0.6
 
 # Reward extension [ms]
 delayReward = 300 * millisecond
@@ -201,8 +205,8 @@ if STORE_DATA or STORE_FAILED:
         filename = dataFolder+file_base+''
 
 if STORE_DATA:
-    DATA = OrderedDict([('SNc',0),('P-buff',0),('choice',0),('nchoice',0),('motTime',0),('weights',''),('cogTime',0),
-                        ('failedTrials',0),('persistence',0),('values',''),('P',0),('P-3',0),('R',0),('R-buff',0),
+    DATA = OrderedDict([('SNc',0),('SNc_h',0),('P-buff',0),('choice',0),('nchoice',0),('motTime',0),('weights',''),('cogTime',0),
+                        ('failedTrials',0),('persistence',0),('values',''),('P',0),('P-3',0),('R',0),('R-buff',0),('pA',0),
                         ('P-3',0),('LTD-LTP',''),('A',0),('A-buff',0),('pchoice',''),('Regret',0),('cumRegret',0),('c_rewards','')])
     with open(filename,"w") as records:
         wtr = csv.DictWriter(records, DATA.keys(),delimiter=',')
@@ -391,6 +395,7 @@ def positiveClip(V):
 
 def fillData():
     DATA['SNc']          = SNc_dop['V'][0][0]
+    DATA['SNc_h']        = SNc_dop['SNc_h'][0]
     DATA['P-buff']       = np.array(P[-perfBuff:]).mean()
     DATA['choice']       = choice
     DATA['nchoice']      = nchoice if not garivierMoulines else -1
@@ -406,6 +411,7 @@ def fillData():
     DATA['R-buff']       = np.array(R[-perfBuff:]).mean()
     DATA['LTD-LTP']      = '\t'.join(['{:.5f}'.format(float(i)) for i in trialLtdLtp.reshape((n*4,1))])
     DATA['A']            = A[-1:][0]
+    DATA['pA']           = perceived_advantage
     DATA['A-buff']       = np.array(A[-perfBuff:]).mean()
     DATA['pchoice']      = '\t'.join(['{:.2f}'.format(np.nanmean(i)) for i in probChoice])
     DATA['Regret']       = Regret[-1:][0]
@@ -824,7 +830,7 @@ def register(t):
     global currentTrial, continuousFailedTrials, selectionError, cogDecision
     global cogDecisionTime, motDecision, motDecisionTime
     global choice, nchoice, mchoice, pError, smoothR, smoothA, pastW, cog_cues_value
-    global cumRegret
+    global cumRegret, perceived_advantage
     
     if not cogDecision:
         U = np.sort(Cortex_cog['V'].ravel())
@@ -934,11 +940,11 @@ def register(t):
         smoothA = alpha_SuccessEMA * smoothA + (1-alpha_SuccessEMA) * (perceived_advantage if usePerception else advantage)
         if dynamicDA:
             if dynamicDAoverA:
-                sSmoothA = smoothA
-                if minSmoothA:
-                    sSmoothA = np.max((sSmoothA-minSmoothA,0))/(1-minSmoothA)
-                print "Smooth advantage: ",smoothA," [ sat -",sSmoothA,"]"
-                SNc_dop['SNc_h'] = SNc_h_base - gamma_DAbySuccess * sSmoothA
+                if minSmoothA >= 0:
+                    smoothA = np.max((smoothA-minSmoothA,0))/(1-minSmoothA)
+                    SNc_dop['SNc_h'] = SNc_h_base - gamma_DAbySuccess * smoothA
+                else:
+                    SNc_dop['SNc_h'] = sigmoid(smoothA,Vmin=SNc_h_base,Vmax=SNc_h_base-gamma_DAbySuccess,Vh=adv_h,Vc=-minSmoothA)
             else:
                 SNc_dop['SNc_h'] = SNc_h_base - gamma_DAbySuccess * smoothR
 

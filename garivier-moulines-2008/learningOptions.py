@@ -61,6 +61,8 @@ parser.add_option("-R", "--expected-reward", dest="eReward", action="store_true"
 parser.add_option("-s", "--seed", dest="seed", default=0, type="int", metavar="S", help="Number use for initiating the random generator (0 for no initiation).")
 parser.add_option("-S", "--storeData", dest="storeData", action="store_true", default=False,
                   help="Enables the storing of generated data.")
+parser.add_option("--smoothAdv", dest="minSmoothA", default=0, type="float", metavar="mADV", help="If different than zero (it's default value) \
+                  and pAdvantage flag is activated, creates a minimal hard threshold (for positive values) or enables the use of a sigmoid transfer function shaping advantage perception.")
 parser.add_option("--staticThreshold", dest="sThreshold", action="store_true", default=False,
                   help="Disables DA dependence at striatal threshold.")
 parser.add_option("--staticCtxStr", dest="sCtxStr", action="store_true", default=False,
@@ -155,5 +157,5 @@ garivierMoulines = options.garivierMoulines
 pasquereau = options.pasquereau
 
 dynamicDAoverA = options.dynamicDAoverA
-minSmoothA = 0.8
+minSmoothA = options.minSmoothA
 usePerception = True
