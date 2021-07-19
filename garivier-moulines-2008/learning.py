@@ -189,6 +189,8 @@ if staticThreshold:
     file_base += 'sTh_'
 if staticCtxStr:
     file_base += 'sCxtStr_'
+if minSmoothA != 0:
+    file_base += 'mAdv'+str(minSmoothA)+'_'
 
 file_base += str(DA)+'_'+str(alpha_LTP)+'_'+str(alpha_LTD)+'_'
 
