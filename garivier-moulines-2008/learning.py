@@ -107,7 +107,7 @@ alpha_Rew_DA = 15 # [sp/s]
 # DA strenght on striatal inputs
 gamma_DAth        = 1
 gamma_DAstrenght  = .025
-gamma_DAbySuccess = 4 # [sp/s]
+gamma_DAbySuccess = 6 # [sp/s]
 alpha_SuccessEMA   = .8
 gamma_DA_LTD      = 0.025 # (1+gamma_DA_LTD * DA) -> 1.8 (4.0) - 2.2 (6.0) - 2.6 (8.0)
 gamma_mGluR_LTD   = 0.01 # 60 * (1+DA) -> 60 * 5 - 60*9 -> 300-700
@@ -941,8 +941,8 @@ def register(t):
         if dynamicDA:
             if dynamicDAoverA:
                 if minSmoothA >= 0:
-                    smoothA = np.max((smoothA-minSmoothA,0))/(1-minSmoothA)
-                    SNc_dop['SNc_h'] = SNc_h_base - gamma_DAbySuccess * smoothA
+                    ssmoothA = np.max((smoothA-minSmoothA,0))/(1-minSmoothA)
+                    SNc_dop['SNc_h'] = SNc_h_base - gamma_DAbySuccess * ssmoothA
                 else:
                     SNc_dop['SNc_h'] = sigmoid(smoothA,Vmin=SNc_h_base,Vmax=SNc_h_base-gamma_DAbySuccess,Vh=adv_h,Vc=-minSmoothA)
             else:
