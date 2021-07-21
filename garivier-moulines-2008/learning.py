@@ -854,10 +854,6 @@ def register(t):
     mot_choice = np.argmax(Cortex_mot['V'])
     cog_choice = np.argmax(Cortex_cog['V'])
 
-    # Compute reward
-    reward = np.random.uniform(0,1) < cues_reward[choice]
-    R.append(reward)
-
     # The motor selection is the executed one, then it
     # defines the selected cue in a cognitive domain.
     # The actual cognitive selection might differ.
@@ -890,6 +886,9 @@ def register(t):
         else:
             P.append(0.0)
 
+        # Compute reward
+        reward = np.random.uniform(0,1) < cues_reward[choice]
+        R.append(reward)
 
         # How good was the selection compared to the best choice presented
         regret = np.max([cues_reward[choice],cues_reward[nchoice]]) - cues_reward[choice]
@@ -918,6 +917,10 @@ def register(t):
             P.append(1.0)
         else:
             P.append(0.0)
+
+        # Compute reward
+        reward = np.random.uniform(0,1) < cues_reward[choice]
+        R.append(reward)
 
         # How good was the selection compared to the best choice presented
         regret = np.max(cues_reward) - cues_reward[choice]
