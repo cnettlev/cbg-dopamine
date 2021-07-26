@@ -72,6 +72,7 @@ parser.add_option("--storePlots", dest="savePlots", default=-1, type="int", meta
 parser.add_option("-t", "--trials", dest="nTrials", default=120, type="int",
                   help="Number of trials. (Int)", metavar="nTrials")
 parser.add_option("--tonicDA-timeConstant", dest="tau_tonicDA", type="float", default=0.001, metavar="tDA_tau", help="Set the time constant of the tonic DA filter when dynamicDA is used.")
+parser.add_option("--tonicDA-increase", dest="gamma_DA", type="float", default=6, metavar="gamma_DA", help="Set the top tonic activity, reached on a repeteadly succesfull experence.")
 parser.add_option("--uncorrelatedNoise", dest="ucNoise", action="store_true", default=False,
                   help="Disables the use of correlated noise in the dopamine affected striatal populations.", metavar="ucorrNoise")
 parser.add_option("-w", "--initWmean", dest="initialWeightsMean", type="float", default=0.5, metavar='wMean',
@@ -157,5 +158,6 @@ garivierMoulines = options.garivierMoulines
 pasquereau = options.pasquereau
 
 dynamicDAoverA = options.dynamicDAoverA
+gamma_DAbySuccess = options.gamma_DA
 minSmoothA = options.minSmoothA
 usePerception = True

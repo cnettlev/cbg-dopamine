@@ -107,7 +107,7 @@ alpha_Rew_DA = 15 # [sp/s]
 # DA strenght on striatal inputs
 gamma_DAth        = 1
 gamma_DAstrenght  = .025
-gamma_DAbySuccess = 6 # [sp/s]
+# gamma_DAbySuccess = 6 # [sp/s]
 alpha_SuccessEMA   = .8
 gamma_DA_LTD      = 0.025 # (1+gamma_DA_LTD * DA) -> 1.8 (4.0) - 2.2 (6.0) - 2.6 (8.0)
 gamma_mGluR_LTD   = 0.01 # 60 * (1+DA) -> 60 * 5 - 60*9 -> 300-700
@@ -149,8 +149,8 @@ adv_c = 0.1
 # Learning parameters
 decision_threshold = 30
 alpha_c     = 0.2  # 0.05
-# Wmin, Wmax = 0.45, 0.55
-Wmin, Wmax = 0.4, 0.6
+Wmin, Wmax = 0.45, 0.55
+# Wmin, Wmax = 0.4, 0.6
 
 # Reward extension [ms]
 delayReward = 300 * millisecond

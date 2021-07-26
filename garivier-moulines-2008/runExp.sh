@@ -32,18 +32,8 @@ cp $fName $folder/$fName
 tab=" --tab"
 options=()
 
-
-# cmds[1]="python parallel-learning.py -l -f $folder -t 100 -n 20 -P --storePlots 5 -a \" -d 4.0 --dynamicDA  --pAdvantage  \""
-cmds[1]="python parallel-learning.py -l -f $folder -t 200 -n 15 -P -a \" -d 4.0 --dynamicDA --pAdvantage --smoothAdv 0.8\""
-cmds[2]="python parallel-learning.py -l -f $folder -t 200 -n 15 -P -a \" -d 4.0 --dynamicDA --pAdvantage --smoothAdv -0.1\""
-cmds[3]="python parallel-learning.py -l -f $folder -t 200 -n 15 -P -a \" -d 4.0 --dynamicDA --pAdvantage --smoothAdv -0.05\""
-# cmds[2]="python parallel-learning.py -l -f $folder -t 50 -n 10  -a \" -d 4.0 \""
-# cmds[3]="python parallel-learning.py -l -f $folder -t 50 -n 10  -a \" -d 6.0 \""
-# cmds[4]="python parallel-learning.py -l -f $folder -t 50 -n 10  -a \" -d 8.0 \""
-# cmds[2]="python parallel-learning.py -l -f $folder -t 100 -n 12 -P --storePlots 1000 -a \" -d 4.0 --garivierMoulines --pAdvantage  \""
-
-
-
+cmds[1]="python parallel-learning.py -l -f $folder -t 100 -n 10 -a \" -d 4.0 --dynamicDA --pAdvantage --smoothAdv -0.05 -t 200 \""
+cmds[2]="python parallel-learning.py -l -f $folder -t 100 -n 10 -a \" -d 4.0 --dynamicDA --pAdvantage --smoothAdv -0.05 --garivierMoulines \""
 
 for cmd in "${cmds[@]}"; do
 options+=($tab --title="$cmd" --command="bash -c '$cmd ; bash'" )
