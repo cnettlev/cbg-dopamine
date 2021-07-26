@@ -207,7 +207,7 @@ if STORE_DATA or STORE_FAILED:
         filename = dataFolder+file_base+''
 
 if STORE_DATA:
-    DATA = OrderedDict([('SNc',0),('SNc_h',0),('P-buff',0),('choice',0),('nchoice',0),('motTime',0),('weights',''),('cogTime',0),
+    DATA = OrderedDict([('SNc',0),('SNc_h',0),('P-buff',0),('choice',0),('nchoice',0),('motTime',0),('weights',''),('mot_weights',''),('cogTime',0),
                         ('failedTrials',0),('persistence',0),('values',''),('P',0),('P-3',0),('R',0),('R-buff',0),('pA',0),
                         ('P-3',0),('LTD-LTP',''),('A',0),('A-buff',0),('pchoice',''),('Regret',0),('cumRegret',0),('c_rewards','')])
     with open(filename,"w") as records:
@@ -403,6 +403,7 @@ def fillData():
     DATA['nchoice']      = nchoice if not garivierMoulines else -1
     DATA['motTime']      = motDecisionTime
     DATA['weights']      = '\t'.join(['{:.5f}'.format(i) for i in W_cortex_cog_to_striatum_cog.weights.diagonal()])
+    DATA['mot_weights']  = '\t'.join(['{:.5f}'.format(i) for i in W_cortex_mot_to_striatum_mot.weights.diagonal()])
     DATA['cogTime']      = cogDecisionTime
     DATA['failedTrials'] = failedTrials
     DATA['persistence']  = 1 if np.max(Cortex_cog['V']) > 30 else 0
