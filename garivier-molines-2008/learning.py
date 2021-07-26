@@ -175,13 +175,11 @@ if len(invertAt):
     file_base += 'r'+'-'.join([str(i) for i in invertAt])+'_'
 
 if STORE_DATA:
-    DATA = OrderedDict([('n',n),('DA',DA),('SNc',0),('P-buff',0),('choice',0),('nchoice',0),('motTime',0)]+[('weight_'+str(c),0) for c in N]+[('cogTime',0),
-                        ('failedTrials',0),('persistence',0)]+[('value_'+str(c),0) for c in N]+[('P',0),('P-3',0),('R',0),('R-buff',0),
-                        ('P-3',0)]+[('ltd_dw_'+str(c),0) for c in N]+[('ltd_dwS_'+str(c),0) for c in N]+[('ltp_dw_'+str(c),0) for c in N]+
-                        [('ltp_dwS_'+str(c),0) for c in N]+[('A',0),('A-buff',0),('Regret',0),('cumRegret',0)]+[('STR_cog_'+str(c),0) for c in N]+[('STR_mot_'+str(c),0) for c in N]+
-                        [('CTX_cog_'+str(c),0) for c in N]+[('CTX_mot_'+str(c),0) for c in N])
-    with open(filename,"w") as file:
-        wtr = csv.DictWriter(file, DATA.keys(),delimiter=',')
+    DATA = OrderedDict([('SNc',0),('SNc_h',0),('P-buff',0),('choice',0),('nchoice',0),('motTime',0),('weights',''),('mot_weights',''),('cogTime',0),
+                        ('failedTrials',0),('persistence',0),('values',''),('P',0),('P-3',0),('R',0),('R-buff',0),('pA',0),
+                        ('P-3',0),('LTD-LTP',''),('A',0),('A-buff',0),('pchoice',''),('Regret',0),('cumRegret',0),('c_rewards','')])
+    with open(filename,"w") as records:
+        wtr = csv.DictWriter(records, DATA.keys(),delimiter=',')
         wtr.writeheader()
 
 # Include learning
@@ -338,43 +336,30 @@ def positiveClip(V):
     return np.maximum(V, 0.0)
 
 def fillData():
-    global cumRegret
-
-    DATA['SNc']                     = SNc_dop['V'][0][0]
-    DATA['P-buff']                  = np.array(P[-perfBuff:]).mean()
-    DATA['choice']                  = choice
-    DATA['nchoice']                 = -1
-    DATA['motTime']                 = motDecisionTime
-    w = W_cortex_cog_to_striatum_cog.weights.diagonal()
-    for c in N:
-        DATA['weight_'+str(c)]      = w[c]
-    DATA['cogTime']                 = cogDecisionTime
-    DATA['failedTrials']            = failedTrials
-    DATA['persistence']             = 1 if np.max(Cortex_cog['V']) > 30 else 0
-    for c in N:
-        DATA['value_'+str(c)]       = cog_cues_value[c]
-    DATA['P']                       = P[-1:][0]
-    DATA['P-3']                     = np.array(P[-3:]).mean()
-    DATA['R']                       = R[-1:][0]
-    DATA['R-buff']                  = np.array(R[-perfBuff:]).mean()
-    for c in N:
-        DATA['ltd_dw_'+str(c)]             = trialLtdLtp[c,0]
-        DATA['ltd_dwS_'+str(c)]            = trialLtdLtp[c,1]
-        DATA['ltp_dw_'+str(c)]             = trialLtdLtp[c,2]
-        DATA['ltp_dwS_'+str(c)]            = trialLtdLtp[c,3]
-    DATA['A']                       = A[-1:][0]
-    DATA['A-buff']                  = np.array(A[-perfBuff:]).mean()
-    DATA['Regret']                  = Regret[-1:][0]
-    DATA['cumRegret']                  = cumRegret
-
-    for c in N:
-        DATA['STR_cog_'+str(c)]       = Striatum_cog['Is'][c][0]
-    for c in N:
-        DATA['STR_mot_'+str(c)]       = Striatum_mot['Is'][0][c]
-    for c in N:
-        DATA['CTX_cog_'+str(c)]       = Cortex_cog['V'][c][0]
-    for c in N:
-        DATA['CTX_mot_'+str(c)]       = Cortex_mot['V'][0][c]
+    DATA['SNc']          = SNc_dop['V'][0][0]
+    DATA['SNc_h']        = SNc_dop['SNc_h'][0]
+    DATA['P-buff']       = np.array(P[-perfBuff:]).mean()
+    DATA['choice']       = choice
+    DATA['nchoice']      = nchoice if not garivierMoulines else -1
+    DATA['motTime']      = motDecisionTime
+    DATA['weights']      = '\t'.join(['{:.5f}'.format(i) for i in W_cortex_cog_to_striatum_cog.weights.diagonal()])
+    DATA['mot_weights']  = '\t'.join(['{:.5f}'.format(i) for i in W_cortex_mot_to_striatum_mot.weights.diagonal()])
+    DATA['cogTime']      = cogDecisionTime
+    DATA['failedTrials'] = failedTrials
+    DATA['persistence']  = 1 if np.max(Cortex_cog['V']) > 30 else 0
+    DATA['values']       = '\t'.join(['{:.5f}'.format(i) for i in cog_cues_value])
+    DATA['P']            = P[-1:][0]
+    DATA['P-3']          = np.array(P[-3:]).mean()
+    DATA['R']            = R[-1:][0]
+    DATA['R-buff']       = np.array(R[-perfBuff:]).mean()
+    DATA['LTD-LTP']      = '\t'.join(['{:.5f}'.format(float(i)) for i in trialLtdLtp.reshape((n*4,1))])
+    DATA['A']            = A[-1:][0]
+    DATA['pA']           = perceived_advantage
+    DATA['A-buff']       = np.array(A[-perfBuff:]).mean()
+    DATA['pchoice']      = '\t'.join(['{:.2f}'.format(np.nanmean(i)) for i in probChoice])
+    DATA['Regret']       = Regret[-1:][0]
+    DATA['cumRegret']    = cumRegret
+    DATA['c_rewards']    = '\t'.join(['{:.2f}'.format(i) for i in cues_reward])
 
 def printData():
     # if applyInMotorLoop:
