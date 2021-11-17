@@ -2,6 +2,11 @@ from optparse import OptionParser
 import numpy as np
 import os
 import errno
+from socket import gethostname      # Added to specify different output folders
+                                    # deppending on the computer where the code is
+                                    # running
+from collections import OrderedDict
+import csv
 
 usage = "usage: %prog [option_1 [arg_option_1] option_2 [arg_option_2] ...]"
 parser = OptionParser(usage=usage)
@@ -162,3 +167,59 @@ pasquereau = options.pasquereau
 dynamicDAoverA = options.dynamicDAoverA
 gamma_DAbySuccess = options.gamma_DA
 minSmoothA = options.minSmoothA
+
+
+# Defining filename and creating datafile if required
+if STORE_DATA or STORE_FAILED:
+    # filename required if data is stored:
+    file_base =  'CBG-DA_'
+
+    if garivierMoulines:
+        file_base += 'gM_'
+    if useCorrelatedNoise:
+        file_base += 'c_'
+    if constantLTD:
+        file_base += 'cLTD_' #+ str(constantLTD)
+    if dynamicDA:
+        file_base += 'd_'
+        if dynamicDAoverA:
+            file_base += 'pAdv_'
+    if relativeValue:
+        file_base += 'rv_'
+    if invertAt:
+        for rAt in invertAt:
+            file_base += 'r'+str(rAt)+'_'
+    if N_factor != 1.0:
+        file_base += 'N'+str(N_factor)+'_'
+    if aux_X != 1:
+        file_base += 'x'+str(aux_X)+'_'
+    if aux_Y != 1:
+        file_base += 'y'+str(aux_Y)+'_'
+    if staticThreshold:
+        file_base += 'sTh_'
+    if staticCtxStr:
+        file_base += 'sCxtStr_'
+    if minSmoothA != 0:
+        file_base += 'msDA'+str(minSmoothA)+'_'
+    if DA_neurons != 1:
+        file_base += 'nDA'+str(DA_neurons)+'_'
+
+    file_base += str(DA)+'_'+str(alpha_LTP)+'_'+str(alpha_LTD)+'_'
+
+    if nFile:
+        file_base += nFile
+    else:
+        file_base += datetime.now().strftime("%Y%m%d")
+    
+    if 'corcovado' == gethostname() and  not folder:
+        filename = '/mnt/Data/Cristobal/tonicDA_effects/connections/Exp/'+file_base+''
+    else:
+        filename = dataFolder+file_base+''
+
+if STORE_DATA:
+    DATA = OrderedDict([('SNc',''),('SNc_h',''),('P-buff',0),('choice',0),('nchoice',0),('motTime',0),('weights',''),('mot_weights',''),('cogTime',0),
+                        ('failedTrials',0),('persistence',0),('values',''),('P',0),('P-3',0),('R',0),('R-buff',0),('pA',0),
+                        ('P-3',0),('LTD-LTP',''),('A',0),('A-buff',0),('pchoice',''),('Regret',0),('cumRegret',0),('c_rewards',''),('STR_DA',0)])
+    with open(filename,"w") as records:
+        wtr = csv.DictWriter(records, DATA.keys(),delimiter=',')
+        wtr.writeheader()
