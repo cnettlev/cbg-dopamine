@@ -45,6 +45,9 @@ NOISE = np.array([7])
 if logFile:
     additionalOptions += ' --debug'
 
+if options.nDA > 1:
+    additionalOptions += ' --DA-neurons '+str(options.nDA)
+
 folder = options.folder
 if folder:
     additionalOptions += ' -F'+folder
@@ -106,7 +109,7 @@ def runModelLearning(i):
         else:
             DA = 0.5*float(i) if parallelDivisions else 0.5*float(j)
 
-        bProcess = 'python learning.py -d'+str(DA)+' -f'+str(time + baseNumber).zfill(3)
+        bProcess = 'python learningDA.py -d'+str(DA)+' -f'+str(time + baseNumber).zfill(3)
         fisrtDiv = (parallelDivisions and (i==0)) or (not parallelDivisions and (j==0))
         if firstDynamic and fisrtDiv:
             bProcess += ' --dynamicDA'

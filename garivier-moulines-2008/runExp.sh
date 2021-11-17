@@ -1,6 +1,6 @@
 #!/bin/bash
 
-expName=noise_eval
+expName=compare_multipleDA
 
 HN=`hostname`
 
@@ -10,7 +10,7 @@ else
 	preFolder=$HOME/cbg-da/
 fi
 
-folder=$preFolder`date +%Y%m%d`$expName
+folder=$preFolder`date +%Y%m%d`-$expName
 DIRECTORY=$folder
 DIR_NUM=0
 
@@ -32,8 +32,11 @@ cp $fName $folder/$fName
 tab=" --tab"
 options=()
 
-cmds[1]="python parallel-learning.py -l -f $folder -t 100 -n 10 -a \" -d 4.0 --dynamicDA --pAdvantage --smoothAdv -0.05 -t 200 \""
-cmds[2]="python parallel-learning.py -l -f $folder -t 100 -n 10 -a \" -d 4.0 --dynamicDA --pAdvantage --smoothAdv -0.05 --garivierMoulines \""
+cmds[1]="python parallel-learning.py -l -f $folder -t 10 -n 2 -N 10  -a \" -d 4.0 -t 200 --dynamicDA --ltp 0.0002 \""
+cmds[2]="python parallel-learning.py -l -f $folder -t 10 -n 2 -N 100 -a \" -d 4.0 -t 200 --dynamicDA --ltp 0.0002 \""
+cmds[3]="python parallel-learning.py -l -f $folder -t 10 -n 2        -a \" -d 4.0 -t 200 --dynamicDA --ltp 0.0002 \""
+# cmds[1]="python parallel-learning.py -l -f $folder -t 100 -n 10 -a \" -d 4.0 -t 200 --dynamicDA  --pAdvantage --smoothAdv -0.05 -t 200 \""
+# cmds[2]="python parallel-learning.py -l -f $folder -t 100 -n 10 -a \" -d 4.0 --dynamicDA --pAdvantage --smoothAdv -0.05 --garivierMoulines \""
 
 for cmd in "${cmds[@]}"; do
 options+=($tab --title="$cmd" --command="bash -c '$cmd ; bash'" )

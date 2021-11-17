@@ -21,6 +21,8 @@ parser.add_option("-l","--logFile", dest="lF", action="store_true", default=Fals
                   help="Enables logfiles")
 parser.add_option("-n", "--nJobs", dest="nJ", type="int", default=12,
                   help="Number of parallel processes.")
+parser.add_option("-N", "--da-neurons", dest="nDA", type="int", default=1,
+                  help="Number of dopamine neurons.")
 parser.add_option("-p", "--parallelDivisions", dest="pD", action="store_true", default=False,
                   help="Parallelize by dopamine activity.")
 parser.add_option("-P", "--plotNeuralData", dest="pN", action="store_true", default=False,

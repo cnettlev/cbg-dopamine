@@ -11,6 +11,7 @@ parser.add_option("-b", "--performanceBuffSize", dest="perfBuffSize", default=12
 parser.add_option("-d", "--da", dest="DA", default=4.0, type="float",
                   help="Tonic DA level. (Float)", metavar="DA")
 parser.add_option("-D", "--disLearning", dest="disableLearning", action="store_true", default=False, help="Disable learning.")
+parser.add_option("--DA-neurons", dest="DA_neurons", default=1, type="int", help="Defines the number of midbrain dopaminergic neurons (from SNc).")
 parser.add_option("--dynamicDA", dest="dynamicDA", action="store_true", default=False, help="Enable dynamic tonic DA.")
 parser.add_option("--debug", dest="debug", action="store_true", default=False,
                   help="Enables \"DEBUG\" flag (meaning that it prints what is going on trial by trial.", metavar="DEBUG")
@@ -62,7 +63,7 @@ parser.add_option("-s", "--seed", dest="seed", default=0, type="int", metavar="S
 parser.add_option("-S", "--storeData", dest="storeData", action="store_true", default=False,
                   help="Enables the storing of generated data.")
 parser.add_option("--smoothAdv", dest="minSmoothA", default=0, type="float", metavar="mADV", help="If different than zero (it's default value) \
-                  and pAdvantage flag is activated, creates a minimal hard threshold (for positive values) or enables the use of a sigmoid transfer function shaping advantage perception.")
+                  and dynamicDA flag is activated, creates a minimal hard threshold (for positive values) or enables the use of a sigmoid transfer function shaping advantage (using --pAdvantage) or reward perception.")
 parser.add_option("--staticThreshold", dest="sThreshold", action="store_true", default=False,
                   help="Disables DA dependence at striatal threshold.")
 parser.add_option("--staticCtxStr", dest="sCtxStr", action="store_true", default=False,
@@ -96,6 +97,7 @@ def createUnexistentFolder(folder):
 
 perfBuff = np.abs(options.perfBuffSize)
 DA = options.DA
+DA_neurons = options.DA_neurons
 dynamicDA = options.dynamicDA
 tauTonicDA = options.tau_tonicDA
 n = options.n
@@ -160,4 +162,3 @@ pasquereau = options.pasquereau
 dynamicDAoverA = options.dynamicDAoverA
 gamma_DAbySuccess = options.gamma_DA
 minSmoothA = options.minSmoothA
-usePerception = True
