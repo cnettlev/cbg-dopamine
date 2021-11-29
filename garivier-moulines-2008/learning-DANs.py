@@ -50,6 +50,7 @@ from datetime import datetime       # Added to create a store file with time dat
 from learningOptions import *       # Added argument options parser
 import csv
 import itertools
+from measureTime import measure
 
 #################################    
 ### Parameters
@@ -106,7 +107,7 @@ alpha_Rew_DA = 15 # [sp/s]
 gamma_DAth        = 1
 gamma_DAstrenght  = .025
 # gamma_DAbySuccess = 6 # [sp/s]
-alpha_SuccessEMA   = .8
+alpha_SuccessEMA   = .9
 gamma_DA_LTD      = 0.025 # (1+gamma_DA_LTD * DA) -> 1.8 (4.0) - 2.2 (6.0) - 2.6 (8.0)
 gamma_mGluR_LTD   = 0.01 # 60 * (1+DA) -> 60 * 5 - 60*9 -> 300-700
 gamma_eCB1_LTD    = 0.1 # (1-20)
@@ -144,7 +145,7 @@ SNc_deltaDA     = 0.2
 
 # DA buffer for a time delay on arD2
 DA_buffSize = int(round(arD2_lag/dt))
-DA_buff = np.zeros((DA_buffSize,))
+DA_buff = np.zeros((SNc_neurons,DA_buffSize))
 DA_buffIndex = 0
 
 # Sigmoid parameter
@@ -273,6 +274,23 @@ def sigmoid(V,Vmin=Vmin,Vmax=Vmax,Vh=Vh0,Vc=Vc):
 
 # def rewardShape(t,rewardTime,dev=0.1):
 #     return np.exp(-(t-(rewardTime+3*dev))**2/(2*dev**2))
+# 
+def actualizeTonicDA():
+    if dynamicDAoverA:
+        if minSmoothA >= 0:
+            ssmoothA = np.max((smoothA-minSmoothA,0))/(1-minSmoothA)
+            SNc_dop['SNc_h'] = SNc_h_base - gamma_DAbySuccess * ssmoothA
+        else:
+            SNc_dop['SNc_h'] = sigmoid(smoothA,Vmin=SNc_h_base,Vmax=SNc_h_base-gamma_DAbySuccess,Vh=tonicDA_h,Vc=-minSmoothA)
+    else:
+        if minSmoothA >= 0:
+            ssmoothR = np.max((smoothR-minSmoothA,0))/(1-minSmoothA)
+            SNc_dop['SNc_h'] = SNc_h_base - gamma_DAbySuccess * ssmoothR
+        else:
+            SNc_dop['SNc_h'] = sigmoid(smoothR,Vmin=SNc_h_base,Vmax=SNc_h_base-gamma_DAbySuccess,Vh=tonicDA_h,Vc=-minSmoothA)
+
+    for i in range(SNc_neurons):
+        DA_buff[i] = -SNc_dop['SNc_h'][i][0]
 
 def strThreshold(DA):
     if staticThreshold:
@@ -321,6 +339,7 @@ def init_weights(L, gain=1):
     L._weights = gain*W*(Wmin + (Wmax - Wmin)*N)
 
 def reset():
+    print "Reset!"
     for group in network.__default_network__._groups:
         # group['U'] = 0
         group['V'] = 0
@@ -331,11 +350,11 @@ def reset():
     Cortex_cog['n'] = 0
     SNc_dop['Irew'] = 0
     SNc_dop['Ie_rew'] = 0
-    SNc_dop['u'] = -SNc_dop['SNc_h']
-    SNc_dop['V_lag'] = -SNc_dop['SNc_h']
-    SNc_dop['V'] = -SNc_dop['SNc_h']
+    SNc_dop['u'] = -SNc_dop['SNc_h'][0]
+    SNc_dop['V_lag'] = -SNc_dop['SNc_h'][0]
+    SNc_dop['V'] = -SNc_dop['SNc_h'][0]
     SNc_dop['DAtoD2c'] = 0
-    DA_buff[:] = -SNc_dop['SNc_h'][0]
+    actualizeTonicDA()
 
 def partialReset():
     global motDecisionTime, cogDecisionTime, trialLtdLtp
@@ -347,6 +366,7 @@ def partialReset():
     motDecision = False
     motDecisionTime = 3500.0
     trialLtdLtp *= 0
+    actualizeTonicDA()
 
 def resetPlot():
     global pastW,cogWDiff,cogMarker,motMarker,movMarker
@@ -599,6 +619,7 @@ nW = np.copy(np.diag(pastW))
 
 @clock.at(500*millisecond)
 def set_trial(t):
+    timer = measure()
     global cues_cog, cogDecision, cogDecisionTime, motDecision, motDecisionTime, c1, c2, m1, m2
     global inputCurrents_noise, flag, ctxLabels
     global wnoise
@@ -642,9 +663,11 @@ def set_trial(t):
         for w in range(n):
             wnoise = np.random.normal(0,(W.weights[w,w]-Wmin)*Weights_N)
             W.weights[w,w] = clip(W.weights[w,w] + wnoise, Wmin, Wmax)
+    timer.stop()
 
 @before(clock.tick)
 def computeSoftInput(t):
+    # timer = measure()
     if motDecisionTime < 3500:
         inputsOffAt =  motDecisionTime/1000+delayReward+0.2
     else:
@@ -655,35 +678,46 @@ def computeSoftInput(t):
         Cortex_mot['Iext'][0          ,cues_mot[i]] = v + inputCurrents_noise[i*3]
         Cortex_cog['Iext'][cues_cog[i],0          ] = v + inputCurrents_noise[i*3+1]
         Cortex_ass['Iext'][cues_cog[i],cues_mot[i]] = v + inputCurrents_noise[i*3+2]
+    # timer.stop()
 
 @clock.at(3000*millisecond)
 def unset_trial(t):
+    timer = measure()
     Cortex_mot['Iext'] = 0
     Cortex_cog['Iext'] = 0
     Cortex_ass['Iext'] = 0
+    timer.stop()
 
 @clock.at(duration*.9)
 def storeResults(t):
+    timer = measure()
     if completeTrials and STORE_DATA and motDecision:
         printData()
+    timer.stop()
 
 @before(clock.tick)
 def convolvD2(t):
+    # timer = measure()
     baseActivity = -SNc_dop['SNc_h']
-    relativeFiringRate = SNc_dop['V_lag']-baseActivity
-    SNc_dop['DAtoD2c'] = positiveClip(convolv_D2Kernel(t,SNc_dop['DAtoD2c'],relativeFiringRate))
+    relativeFiringRate = np.mean(SNc_dop['V_lag']-baseActivity) # recreating extracellular space
+    for i in range(SNc_neurons):
+        SNc_dop['DAtoD2c'][i] = positiveClip(convolv_D2Kernel(t,SNc_dop['DAtoD2c'][i],relativeFiringRate))
+    # timer.stop()
 
 @before(clock.tick)
 def fillDopamineBuffer(t):
+    # timer = measure()
     global DA_buffIndex
     buffPos = DA_buffIndex % DA_buffSize
     for i in range(SNc_neurons):
-        DA_buff[buffPos] = SNc_dop['V'][i]
-        SNc_dop['V_lag'][i] = DA_buff[(buffPos+1) % DA_buffSize]
+        DA_buff[i][buffPos] = SNc_dop['V'][i]
+        SNc_dop['V_lag'][i] = DA_buff[i][(buffPos+1) % DA_buffSize]
     DA_buffIndex += 1
+    # timer.stop()
 
 @before(clock.tick)
 def deliverReward(t):
+    # timer = measure()
     if motDecisionTime/1000 + delayReward < t:
         if t < motDecisionTime/1000 + reward_ext and SNc_dop['Irew'][0] == 0:
             for i in range(SNc_neurons):
@@ -698,9 +732,11 @@ def deliverReward(t):
             SNc_dop['Ie_rew'] = float(cog_cues_value[np.argmax(Cortex_cog['V'])]) * alpha_Rew_DA
         elif t > (cogDecisionTime/1000 + reward_ext - delayReward):
             SNc_dop['Ie_rew'] = 0
+    # timer.stop()
 
 @after(clock.tick)
 def earlyStop(t):
+    #timer = measure()
     global currentTrial, continuousFailedTrials
     if stopAfterSelecion and motDecisionTime < 3500:
         if t > motDecisionTime / 1000 + afterSelectionTime:
@@ -715,6 +751,7 @@ def earlyStop(t):
             clock.reset()
             currentTrial += 1
             continuousFailedTrials = 0
+    #timer.stop()
 
 #################################    
 ### Learning processes 
@@ -722,11 +759,13 @@ def earlyStop(t):
 
 @after(clock.tick)
 def corticostriatal_learning(t):
+    timer = measure()
+
     if learn:
         # if choice < 0:
         #     return
         W = W_cortex_cog_to_striatum_cog
-        dDA = np.mean([SNc_dop['V'][i]-(-SNc_dop['SNc_h'][i]) for i in range(SNc_neurons)])  # current DA activity w.r.t. base level
+        dDA = np.mean(SNc_dop['V']-(-SNc_dop['SNc_h']))  # current DA activity w.r.t. base level
         if (constantLTD or oneStepConstantLTD) and dDA < 0:
             return
         if SNc_dop['Ir'][0] > 0 and dDA > 0: # LTP
@@ -750,9 +789,13 @@ def corticostriatal_learning(t):
                 w = clip(W.weights[c, c] + dw, Wmin, Wmax)
                 W.weights[c,c] = w
 
+    timer.stop()
+
 
 @before(clock.tick)
 def corticostriatalLTD(t):
+    # timer = measure()
+
     if constantLTD:
         W = W_cortex_cog_to_striatum_cog
         for pop in range(n):
@@ -787,13 +830,37 @@ def corticostriatalLTD(t):
                 w = clip(W.weights[pop][pop] + dw,Wmin,Wmax)
                 W.weights[pop][pop] = w
 
+    # timer.stop()
+
 #@after(clock.tick)
+
+
+@clock.at(dt)
+def setTonicDA(t):
+    actualizeTonicDA()
+
+@before(clock.tick)
+def dynamicTonicDA(t):
+    global smoothA, smoothA_reg
+    global smoothR, smoothR_reg
+
+    if dynamicDAoverA and ((smoothA != smoothA_reg) or (smoothR != smoothR_reg) ):
+        smoothA_reg = smoothA
+        smoothR_reg = smoothR
+        actualizeTonicDA()
+
+
+def printThreshold(t):
+    print 'V('+str(t)+'): ',SNc_dop['V'][0][0], '\tSNc_h('+str(t)+'): ',SNc_dop['SNc_h'][0][0]
+
 @clock.every(50*millisecond)
 def register(t):
     global currentTrial, continuousFailedTrials, selectionError, cogDecision
     global cogDecisionTime, motDecision, motDecisionTime
     global choice, nchoice, mchoice, pError, smoothR, smoothA, pastW, cog_cues_value
     global cumRegret, perceived_advantage
+
+    timer = measure()
     
     if not cogDecision:
         U = np.sort(Cortex_cog['V'].ravel())
@@ -909,18 +976,8 @@ def register(t):
             smoothR = alpha_SuccessEMA * smoothR + (1-alpha_SuccessEMA) * reward
             smoothA = alpha_SuccessEMA * smoothA + (1-alpha_SuccessEMA) * (perceived_advantage if usePerception else advantage)
         if dynamicDA:
-            if dynamicDAoverA:
-                if minSmoothA >= 0:
-                    ssmoothA = np.max((smoothA-minSmoothA,0))/(1-minSmoothA)
-                    SNc_dop['SNc_h'] = SNc_h_base - gamma_DAbySuccess * ssmoothA
-                else:
-                    SNc_dop['SNc_h'] = sigmoid(smoothA,Vmin=SNc_h_base,Vmax=SNc_h_base-gamma_DAbySuccess,Vh=tonicDA_h,Vc=-minSmoothA)
-            else:
-                if minSmoothA >= 0:
-                    ssmoothR = np.max((smoothR-minSmoothA,0))/(1-minSmoothA)
-                    SNc_dop['SNc_h'] = SNc_h_base - gamma_DAbySuccess * ssmoothR
-                else:
-                    SNc_dop['SNc_h'] = sigmoid(ssmoothA,Vmin=SNc_h_base,Vmax=SNc_h_base-gamma_DAbySuccess,Vh=tonicDA_h,Vc=-minSmoothA)
+            actualizeTonicDA()
+            
 
         # Compute prediction error
         pError = reward - cog_cues_value[choice]
@@ -974,6 +1031,8 @@ def register(t):
     if STORE_DATA and not completeTrials:
         printData()
 
+    timer.stop()
+
     if completeTrials:
         return
 
@@ -994,7 +1053,7 @@ if neuralPlot:
     nData = 2*n
     nData2 = 2*n
     nDataSnc = SNc_neurons
-    nDataPptn = 3
+    nDataPptn = 2*SNc_neurons
     nData4 = n
     nData4_2 = nData4
     nData5 = n+2 # values plus choiced cue
@@ -1037,7 +1096,7 @@ if neuralPlot:
     axctx_ass.set_title('Associative Cortical activity', fontsize=10)
     # axsnc.set_ylim(-2,20)
     # axsnc.set_title('SNc activity', fontsize=10)
-    axsncPPTN.set_ylim(-2,20)
+    axsncPPTN.set_ylim(0,20)
     axsncPPTN.set_title('SNc and PPTN activity', fontsize=10)
     # axpptn.set_ylim(-15,15)
     # axpptn.set_title('PPTN activity', fontsize=10)
@@ -1132,6 +1191,12 @@ if neuralPlot:
     # for l in range(2):
     #     plt.setp(neuralSignals3_2[l+1],'ls',':')
 
+    for l in range(SNc_neurons):
+        plt.setp(neuralSignalsSncPPTN[l],'color','b')
+        plt.setp(neuralSignalsSncPPTN[l+SNc_neurons],'color','r','ls','--')
+        plt.setp(neuralSignalsSncPPTN[l+2*SNc_neurons],'color','g','ls','--')
+
+
 
     axd = [axstr,axctx,axstr_ass,axgpi,axstn, axth, axsncPPTN, axctx_ass] # axsnc, axpptn]
     axt = [axsnct,axw,axdw,axv,axper,axprob,axentr]
@@ -1167,7 +1232,7 @@ if neuralPlot:
     addLegend(axentr,neuralSignals_entr,'Entropy')
     addLegend(axctx,neuralSignals2,labels_plusOne)
     addLegend(axctx_ass,neuralSignalsCtx_ass,['ASS-'+str(i+1)+'_'+str(j+1) for j in range(n) for i in range(n)])
-    addLegend(axsncPPTN,neuralSignalsSncPPTN,['SNc','PPTN'],n=3)
+    addLegend(axsncPPTN,[neuralSignalsSncPPTN[0],neuralSignalsSncPPTN[SNc_neurons],neuralSignalsSncPPTN[2*SNc_neurons]],['SNc','PPTNr','PPTNe'],n=3)
     addLegend(axw,neuralSignals4,['Wcog['+str(i)+']' for i in cues_cog])
     addLegend(axv,neuralSignals5,['Vcog['+str(i)+']' for i in cues_cog]+['Selection']+['Not selected'])
     # addLegend(axstr_ass,neuralSignalsr1,['StrA'+str(i)+'_'+str(j) for j in range(n) for i in range(n)])
@@ -1180,10 +1245,10 @@ if neuralPlot:
     fig2.tight_layout()
 
     def storePlots():
-        fig.savefig(plotsFolder+file_base+'_'+str(currentTrial)+".pdf",bbox_inches='tight')
-        fig.savefig(plotsFolder+file_base+'_'+str(currentTrial)+".png",bbox_inches='tight')
-        fig2.savefig(plotsFolder+file_base+'_'+str(currentTrial)+"2.png",bbox_inches='tight')
-        fig2.savefig(plotsFolder+file_base+'_'+str(currentTrial)+"2.pdf",bbox_inches='tight')
+        fig.savefig(plotsFolder+file_base+'_T'+str(currentTrial)+".pdf",bbox_inches='tight')
+        fig.savefig(plotsFolder+file_base+'_T'+str(currentTrial)+".png",bbox_inches='tight')
+        fig2.savefig(plotsFolder+file_base+'_E'+str(currentTrial)+".png",bbox_inches='tight')
+        fig2.savefig(plotsFolder+file_base+'_E'+str(currentTrial)+".pdf",bbox_inches='tight')
 
     def drawPlots():
         fig.canvas.draw()
@@ -1268,7 +1333,8 @@ if neuralPlot:
         neuralData_yth[index] = np.hstack(([Thalamus_cog['V'][i][0] for i in range(n)],Thalamus_mot['V'][0][:]))
         
         neuralData_ysncpptn[index][0:SNc_neurons] = [SNc_dop['V'][i][0] for i in range(SNc_neurons)]
-        neuralData_ysncpptn[index][SNc_neurons] = SNc_dop['Ir'][0]
+        neuralData_ysncpptn[index][SNc_neurons:2*SNc_neurons] = [SNc_dop['I'][i][0] for i in range(SNc_neurons)]
+        neuralData_ysncpptn[index][2*SNc_neurons:] = [-SNc_dop['SNc_h'][i][0] for i in range(SNc_neurons)]
         # neuralData_ypptn[index][0] = SNc_dop['Ir']
         # neuralData_ypptn[index][1] = SNc_dop['Irew']
         # neuralData_ypptn[index][2] = SNc_dop['Ie_rew']
