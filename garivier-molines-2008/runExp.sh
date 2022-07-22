@@ -1,6 +1,6 @@
 #!/bin/bash
 
-expName=_garivier
+expName=indirectLoop
 
 HN=`hostname`
 
