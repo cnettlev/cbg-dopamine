@@ -62,7 +62,7 @@ parser.add_option("--pausePlots", dest="pPlots", action="store_true", default=Fa
 parser.add_option("--storePlots", dest="savePlots", default=-1, type="int", metavar="NPLOTS",
                   help="If plots are activated, stores the plots as pdf figures every NPLOTS trials.")
 parser.add_option("-r", "--reverseAt", dest="reverseTrial", default=-1, type="int", metavar="RTRIAL", help="Enables a flip of the vector \
-                  that contains the reward probabilities at trial number RTRIAL of the experiment. -1 means no flip.")
+                  that contains the reward probabilities at trial number RTRIAL of the experiment. Zero or less means no flip.")
 parser.add_option("--relativeValue", dest="rValue", action="store_true", default=False,
                   help="Computes prediction error with respect to a relative expected value defines as the mean between expected values of perceived cues.")
 parser.add_option("-R", "--expected-reward", dest="eReward", action="store_true", default=False,
@@ -132,7 +132,10 @@ if storePlotsEvery > 0:
       createUnexistentFolder(plotsFolder)
 learn = not options.disableLearning
 SNc_N = options.noise
-invertAt = [options.reverseTrial]
+if options.reverseTrial >0:
+  invertAt = [options.reverseTrial]
+else:
+  invertAt = []
 relativeValue = options.rValue
 cogReward = options.eReward
 randomInit = options.seed
@@ -147,7 +150,7 @@ Weights_N = options.wnoise
 options.striatostriatalConnections = False
 options.usePerception = False
 
-file_base =  'DA_' + str(SNc_N)
+file_base =  'DA_'
 
 if useCorrelatedNoise:
     file_base += 'c_'

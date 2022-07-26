@@ -163,7 +163,7 @@ alpha_SuccessEMA = 0.95
 if STORE_DATA:
     DATA = OrderedDict([('SNc',0),('SNc_h',0),('P-buff',0),('choice',0),('nchoice',0),('motTime',0),('weights',''),('mot_weights',''),('cogTime',0),
                         ('failedTrials',0),('persistence',0),('values',''),('P',0),('P-3',0),('R',0),('R-buff',0),('pA',0),
-                        ('P-3',0),('LTD-LTP',''),('A',0),('A-buff',0),('pchoice',''),('Regret',0),('cumRegret',0),('c_rewards','')])
+                        ('P-3',0),('LTD-LTP',''),('A',0),('A-buff',0),('pchoice',''),('Regret',0),('cumRegret',0),('c_rewards',''),('trial',0)])
     with open(filename,"w") as records:
         wtr = csv.DictWriter(records, DATA.keys(),delimiter=',')
         wtr.writeheader()
@@ -382,6 +382,7 @@ def fillData():
     DATA['Regret']       = Regret[-1:][0]
     DATA['cumRegret']    = cumRegret
     DATA['c_rewards']    = '\t'.join(['{:.2f}'.format(i) for i in cues_reward])
+    DATA['trial']        = currentTrial
 
 def printData():
     # if applyInMotorLoop:
@@ -1211,10 +1212,10 @@ if neuralPlot:
     fig_ass.tight_layout()
 
     def storePlots():
-        fig.savefig(plotname+'_neuralActivity_'+str(currentTrial)+"_"+str(nFile)+".pdf",bbox_inches='tight')
-        fig.savefig(plotname+'_neuralActivity_'+str(currentTrial)+"_"+str(nFile)+".png",bbox_inches='tight')
-        fig2.savefig(plotname+'_behavioralOutcomes_'+str(currentTrial)+"_"+str(nFile)+".pdf",bbox_inches='tight')
-        fig2.savefig(plotname+'_behavioralOutcomes_'+str(currentTrial)+"_"+str(nFile)+".png",bbox_inches='tight')
+        fig.savefig(plotname+'_neuralActivity_'+str(currentTrial)+".pdf",bbox_inches='tight')
+        fig.savefig(plotname+'_neuralActivity_'+str(currentTrial)+".png",bbox_inches='tight')
+        fig2.savefig(plotname+'_behavioralOutcomes_'+str(currentTrial)+".pdf",bbox_inches='tight')
+        fig2.savefig(plotname+'_behavioralOutcomes_'+str(currentTrial)+".png",bbox_inches='tight')
 
     def drawPlots():
         fig.canvas.draw()
