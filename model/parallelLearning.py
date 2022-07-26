@@ -7,7 +7,7 @@ import numpy as np
 from time import sleep
 from parallelOptions import options
 
-additionalOptions = ' --ltd-constant --relativeValue -S --correlatedNoise ' + options.aP
+additionalOptions = ' --ltd-constant --relativeValue -S --correlatedNoise --dynamicDA ' + options.aP
 
 parallelDivisions = options.pD
 
@@ -16,7 +16,7 @@ logFile = options.lF
 plotNeuralData = options.pN
 
 firstDynamic = options.fD
-DA_DIV = np.array([4.0])
+DA_DIV = np.array([2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0,10.0])
 DIVISIONS = DA_DIV.shape[0]
 TIMES = options.t
 baseNumber = options.bN
@@ -74,8 +74,8 @@ def addPlotting(processes):
     processes = createList(processes)
     output = []
     for p in processes:
-        # output.append(p+' --flashPlots '+str(options.fP)+' --storePlots '+str(options.sP))
-        output.append(p+' --storePlots '+str(options.sP))
+        output.append(p+' --flashPlots '+str(options.fP)+' --storePlots '+str(options.sP))
+        # output.append(p+' --storePlots '+str(options.sP))
     return output
 
 def runProcess(process):
@@ -105,13 +105,13 @@ def runModelLearning(i):
         else:
             DA = 0.5*float(i) if parallelDivisions else 0.5*float(j)
 
-        bProcess = 'python learningDA.py -d'+str(DA)+' -f'+str(time + baseNumber).zfill(3)
+        bProcess = 'python learning.py -d'+str(DA)+' -f'+str(time + baseNumber).zfill(3)
         fisrtDiv = (parallelDivisions and (i==0)) or (not parallelDivisions and (j==0))
         if firstDynamic and fisrtDiv:
             bProcess += ' --dynamicDA'
 
-        p = addNoise(bProcess)
-        p = addSTDP(p)
+        # p = addNoise(bProcess)
+        p = addSTDP(bProcess)
 
         if time == 0 and plotNeuralData:
         # if plotNeuralData:

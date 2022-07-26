@@ -28,7 +28,7 @@ parser.add_option("-p", "--parallelDivisions", dest="pD", action="store_true", d
 parser.add_option("-P", "--plotNeuralData", dest="pN", action="store_true", default=False,
                   help="Self-explained.")
 parser.add_option("--storePlots", dest="sP", default=50, type="int",
-                  help="Store plots every fP.")
+                  help="Store plots every sP.")
 parser.add_option("-t", "--times", type="int", dest="t", default=1,
                   help="Self-explained.")
 
@@ -50,5 +50,3 @@ if options.folder:
 if options.lF:
   options.logFolder = options.folder + 'logs/'
   createUnexistentFolder(options.logFolder)
-
-
