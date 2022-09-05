@@ -77,7 +77,7 @@ import itertools
 # Default trial duration (max duration)
 duration = 3.5*second
 afterSelectionTime = 1.5*second
-stopAfterSelecion = True
+stopAfterSelection = True
 
 # Default Time resolution
 dt = 1.0*millisecond
@@ -122,7 +122,7 @@ alpha_Rew_DA = 15 # [sp/s]
 # DA strenght on striatal inputs
 gamma_DAth        = 1
 gamma_DAstrenght  = 0.025#.25
-gamma_DAbySuccess = 2 # [sp/s]
+gamma_DAbySuccess = options.DAbySuccess # default is 2 [sp/s]
 alpha_SucessEMA   = 0.8
 gamma_DA_LTD      = 0.025 # (1+gamma_DA_LTD * DA) -> 1.1 (4.0) - 1.15 (6.0) - 1.2 (8.0)
 gamma_mGluR_LTD   = 0.01 # 60 * (1+DA) -> 60 * 5 - 60*9 -> 300-700
@@ -205,7 +205,7 @@ probChoice = 0.5*np.ones((nPatterns,probChoiceBuffSize))
 
 
 # Initialization of the random generator
-if randomInit:
+if randomInit >= 0:
     np.random.seed(randomInit)
 
 # Helper functions
@@ -540,7 +540,7 @@ else:
 # Connectivity
 # -----------------------------------------------------------------------------
 W = DenseConnection( Cortex_cog('V'),   Striatum_cog('I'), 1.0)
-if cogInitialWeights == None:
+if len(cogInitialWeights) == 0:
     init_weights(W)
 else:
     W._weights = cogInitialWeights
@@ -550,10 +550,10 @@ if doPrint:
     print "Cognitive weights: ", np.diag(W._weights)
 
 W = DenseConnection( Cortex_mot('V'),   Striatum_mot('I'), 1.0)#0.9) #1.0)
-if motInitialWeights != None:
-    W._weights = motInitialWeights
-else:
+if len(motInitialWeights) == 0:
     init_weights(W)
+else:
+    W._weights = motInitialWeights
 W_cortex_mot_to_striatum_mot = W
 
 W = DenseConnection( Cortex_ass('V'),   Striatum_ass('I'), 1.0)
@@ -689,10 +689,10 @@ def unset_trial(t):
     Cortex_cog['Iext'] = 0
     Cortex_ass['Iext'] = 0
 
-@clock.at(duration*.9)
-def storeResults(t):
-    if completeTrials and STORE_DATA and motDecision:
-        printData()
+## @clock.at(duration-dt)
+## def storeResults(t):
+##     if completeTrials and STORE_DATA and motDecision:
+##         printData()
 
 @before(clock.tick)
 def convolvD2(t):
@@ -738,7 +738,7 @@ def deliverReward(t):
 @after(clock.tick)
 def earlyStop(t):
     global currentTrial, continuousFailedTrials
-    if stopAfterSelecion and motDecisionTime < 3500 and cogDecisionTime < 3500:
+    if stopAfterSelection and motDecisionTime < 3500 and cogDecisionTime < 3500:
         if t > motDecisionTime / 1000 + afterSelectionTime:
             if neuralPlot:
                 resetPlot()
@@ -805,7 +805,7 @@ def corticostriatal_learning(t):
 
 @before(clock.tick)
 def corticostriatalLTD(t):
-    if constantLTD:
+    if learn and constantLTD:
         W = W_cortex_cog_to_striatum_cog
         for pop in N:
             # print pop,n
@@ -997,19 +997,19 @@ def register(t):
             print "Cognitive values: ", cog_cues_value
             # print "Motor weights:     ", np.diag(Wm._weights)
 
-    if STORE_DATA and not completeTrials:
-        printData()
-
-    if completeTrials:
-        return
-
-    # In case that there is no interest in continuing this trial, 'completeTrials == False',
-    # the model is set to its initial state and the clock is reset, continuing with a new
-    # trial.
-    currentTrial += 1
-    continuousFailedTrials = 0
-    partialReset()
-    clock.reset()
+    # if STORE_DATA and not completeTrials:
+    #     printData()
+# 
+#     # if completeTrials:
+#     #     return
+# 
+#     # # In case that there is no interest in continuing this trial, 'completeTrials == False',
+#     # # the model is set to its initial state and the clock is reset, continuing with a new
+#     # # trial.
+#     # currentTrial += 1
+#     # continuousFailedTrials = 0
+#     # partialReset()
+    # clock.reset()
 
 if neuralPlot:
     cogMarker = motMarker = movMarker = []
@@ -1384,6 +1384,8 @@ while currentTrial < nbTrials:
                 print "Failed trial!! ",cues_cog[:2]
             failedTrials += 1
             continuousFailedTrials += 1
+        elif STORE_DATA:
+            printData()
 
         if motDecision or not forceSelection:
             currentTrial += 1
@@ -1409,7 +1411,8 @@ elif STORE_FAILED:
         else:
             f.write("%d\t%d\t%d\n" % (currentTrial,failedTrials,selectionError))
 
-if STORE_DATA and forceSelection and failedTrials >= nbFailedTrials:
+if STORE_DATA and forceSelection and \
+   (failedTrials >= nbFailedTrials or continuousFailedTrials >= nbContFailedTrials):
     filename += '_error'
     with open(filename,'a') as f:
         f.write("\n")

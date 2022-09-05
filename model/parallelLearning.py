@@ -7,7 +7,7 @@ import numpy as np
 from time import sleep
 from parallelOptions import options
 
-additionalOptions = ' --ltd-constant --relativeValue -S --correlatedNoise --dynamicDA ' + options.aP
+additionalOptions = ' --ltd-constant --relativeValue -S --correlatedNoise --tonicDA-dynamic ' + options.aP
 
 parallelDivisions = options.pD
 
@@ -16,12 +16,12 @@ logFile = options.lF
 plotNeuralData = options.pN
 
 firstDynamic = options.fD
-DA_DIV = np.array([2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0,10.0])
+DA_DIV = np.array(options.daDiv.split(' '))
 DIVISIONS = DA_DIV.shape[0]
 TIMES = options.t
 baseNumber = options.bN
 NJOBS = options.nJ
-WEIGHTS = None # np.array([["0.61414980 0.52987340 0.46941890 0.43399170","0.61561350 0.53347860 0.47005700 0.43940460","0.61691820 0.53227470 0.46791240 0.43998220","0.61740550 0.53296140 0.46909390 0.44151160","0.61779960 0.53731250 0.46666480 0.44043540","0.61750240 0.53647780 0.46687310 0.43947310"]])
+WEIGHTS = np.array([["0.54 0.525 0.49 0.475"],["0.53 0.51 0.49 0.47"]])
 
 cLTD = None 
 
@@ -44,6 +44,10 @@ NOISE = np.array([7])
 
 if logFile:
     additionalOptions += ' --debug'
+
+
+if options.R: # reproducibility
+    additionalOptions += ' --seed-from-nfile'
 
 folder = options.folder
 if folder:
@@ -78,13 +82,30 @@ def addPlotting(processes):
         # output.append(p+' --storePlots '+str(options.sP))
     return output
 
-def runProcess(process):
+def addWeights(processes):
+    processes = createList(processes)
+    output = []
+    for w in WEIGHTS:
+        weights = ' '.join(w)
+        for p in processes:
+            output.append(p+' -i '+weights)
+    return output
+
+def maxmin(n,against=10):
+    return float(np.max((np.min((n,against)),against)))
+
+def runProcess(process, time=-1):
     if type(process) is not str: # is a list
-        Parallel(n_jobs=len(process))(delayed(runProcess)(p) for p in process)
+        nProc = len(process)
+        Parallel(n_jobs=nProc)(delayed(runProcess)(p,time+ip/maxmin(nProc)) for ip, p in enumerate(process))
         return
+
     p = subprocess.Popen(process+additionalOptions,stderr=subprocess.STDOUT, stdout=subprocess.PIPE, shell=True)
     
-    print "Running ",process+additionalOptions
+    if time>=0:
+        print "Running",time,process+additionalOptions
+    else:
+        print "Running",process+additionalOptions
 
     if logFile:
         fname = (options.logFolder+(process+additionalOptions).replace('/', '.')+".txt").replace(' ', '')
@@ -93,7 +114,10 @@ def runProcess(process):
                 # sys.stdout.write(line)
                 logfile.write(line)
     p.wait()
-    print "Finished ",process+additionalOptions
+    if time>=0:
+        print "Finished ("+str(time)+")"
+    else:
+        print "Finished ",process+additionalOptions
 
 def runModelLearning(i):
     forRange = TIMES if parallelDivisions else DIVISIONS
@@ -117,7 +141,10 @@ def runModelLearning(i):
         # if plotNeuralData:
             p = addPlotting(p)
 
-        runProcess(p)
+        if options.sW:
+            p = addWeights(p)
+
+        runProcess(p, time)
 
 if parallelDivisions:
     Parallel(n_jobs=NJOBS)(delayed(runModelLearning)(i) for i in range(DIVISIONS))

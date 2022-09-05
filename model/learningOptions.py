@@ -14,7 +14,6 @@ parser.add_option("--correlatedNoise", dest="cNoise", action="store_true", defau
                   help="Enables the use of correlated noise in the dopamine affected striatal populations.", metavar="corrNoise")
 parser.add_option("-d", "--da", dest="DA", default=4.0, type="float",
                   help="Tonic DA level. (Float)", metavar="DA")
-parser.add_option("--dynamicDA", dest="dynamicDA", action="store_true", default=False, help="Enables dynamic tonic DA.")
 parser.add_option("--debug", dest="debug", action="store_true", default=False,
                   help="Enables \"DEBUG\" flag (meaning that it prints what is going on trial by trial.", metavar="DEBUG")
 parser.add_option("-D", "--disLearning", dest="disableLearning", action="store_true", default=False, help="Disable learning.")
@@ -34,8 +33,6 @@ parser.add_option("--noisyWeights", dest="wnoise", default=0.05, type="float",
                   help="If positive, enables gaussian noise injection at the start of a trial at the corticostriatal cognitive weights, with zero mean and a standard deviation of (weightValue-wMin)*wNoise. (float)", metavar="wNoise")
 parser.add_option("-i", "--cogInitW", dest="cogInitialWeights", type="float", nargs=4, default=None, metavar='cw0 cw1 cw2 ... cwn',
                   help="Initial cognitive corticostriatal weights. (Float array separated by spaces)")
-parser.add_option("--invertDynamic", dest="invDyn", action="store_true", default=False, metavar='INV_DYN',
-                  help="Inverts the effect of rewards (more rewards reduces tonic DA).")
 parser.add_option("-I", "--motInitW", dest="motInitialWeights", type="float", nargs=4, default=None, metavar='mw0 mw1 mw2 ... mwn',
                   help="Initial motor corticostriatal weights.(Float array separated by spaces)")
 parser.add_option("--indirect", dest="indirectLoop", action="store_true", default=False, help="Enables indirect loop.")
@@ -67,14 +64,22 @@ parser.add_option("--relativeValue", dest="rValue", action="store_true", default
                   help="Computes prediction error with respect to a relative expected value defines as the mean between expected values of perceived cues.")
 parser.add_option("-R", "--expected-reward", dest="eReward", action="store_true", default=False,
                   help="Enables the generation of a DA burst based on the expected reward at the moment of the cognitive decisions.")
-parser.add_option("-s", "--seed", dest="seed", default=0, type="int", metavar="S", help="Number use for initiating the random generator (0 for no initiation).")
+parser.add_option("-s", "--seed", dest="seed", default=-1, type="int", metavar="S", help="Number use for initiating the random generator (use S<0 for no initiation).")
+parser.add_option("--seed-from-nfile", dest="nfileSeed", action="store_true", default=False,
+                  help="Forces to use the file number as seed for pseudo-random operations.")
 parser.add_option("-S", "--storeData", dest="storeData", action="store_true", default=False,
                   help="Enables the storing of generated data.")
 parser.add_option("--smooth", dest="minSmooth", default=0, type="float", metavar="SMOOTH", help="If different than zero (it's default value) \
                   and dynamicDA flag is activated, creates a minimal hard threshold (for positive values) or enables the use of a sigmoid transfer function shaping advantage (using --pAdvantage) or reward perception.")
 parser.add_option("-t", "--trials", dest="nTrials", default=120, type="int",
                   help="Number of trials. (Int)", metavar="nTrials")
-parser.add_option("--tonicDA-timeConstant", dest="tau_tonicDA", type="float", default=0.001, metavar="tDA_tau", help="Set the time constant of the tonic DA filter when dynamicDA is used.")
+parser.add_option("--tonicDA-timeConstant", dest="tau_tonicDA", type="float", default=0.001, metavar="tDA_TAU",
+                  help="Set the time constant of the tonic DA filter when dynamicDA is used.")
+parser.add_option("--tonicDA-deltaOverReward", dest="DAbySuccess", type="float", default=2.0, metavar="tDA_R", 
+                  help="Set the range of variation of the tonic DA based on an estimation of the current reward ration.")
+parser.add_option("--tonicDA-dynamic", dest="dynamicDA", action="store_true", default=False, help="Enables dynamic tonic DA.")
+parser.add_option("--tonicDA-invertDynamics", dest="invDyn", action="store_true", default=False, metavar='tDA_INVDYN',
+                  help="Inverts the effect of rewards (more rewards reduces tonic DA).")
 parser.add_option("-z", "--zeroValues", dest="zValues", action="store_true", default=False,
                   help="Set initial cues values as zero.")
 parser.add_option("-X","--parameterX", dest="parX", default=1, type="float",
@@ -106,11 +111,11 @@ Wmean = options.initialWeightsMean
 if options.cogInitialWeights != None:
 	cogInitialWeights = np.diag(np.array(options.cogInitialWeights));
 else:
-	cogInitialWeights = None
+	cogInitialWeights = []
 if options.motInitialWeights != None:
 	motInitialWeights = np.diag(np.array(options.motInitialWeights));
 else:
-	motInitialWeights = None
+	motInitialWeights = []
 alpha_LTP = options.LTP
 alpha_LTD = options.LTD
 constantLTD = options.cLTD
@@ -138,7 +143,7 @@ else:
   invertAt = []
 relativeValue = options.rValue
 cogReward = options.eReward
-randomInit = options.seed
+randomInit = int(nFile) if options.nfileSeed else options.seed
 STORE_DATA = options.storeData
 useCorrelatedNoise = options.cNoise
 zeroValues = options.zValues
@@ -160,6 +165,13 @@ if dynamicDA:
     file_base += 'd_'
 if len(invertAt):
     file_base += 'r'+'-'.join([str(i) for i in invertAt])+'_'
+if randomInit >= 0:
+    file_base += 's'+str(randomInit)+'_'
+file_base += 'dDA_'+str(options.DAbySuccess)+'_'
+file_base += 'X'+str(aux_X)+'_'
+file_base += 'Y'+str(aux_Y)+'_'
+if len(cogInitialWeights):
+  file_base += 'w'+'_'.join([str(c) for c in np.diag(cogInitialWeights)])+'_'
 
 
 if options.GM2008:
@@ -189,5 +201,5 @@ if STORE_DATA or STORE_FAILED:
         else:
             filename = file_base+'_'+str(alpha_LTP)+'_'+str(alpha_LTD)+'_'+str(DA)+'_'+nFile
 
-if neuralPlot and storePlotsEvery:
+if neuralPlot and storePlotsEvery > 0:
   plotname = plotsFolder + os.path.basename(filename)

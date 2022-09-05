@@ -11,6 +11,9 @@ parser.add_option("-a", "--additionalOptions", dest="aP", default='',
                   help="Additional options as e.g.: -a \" -X 3.0 -d 4.6 \".")
 parser.add_option("-b", "--baseNumber", dest="bN", default=0, type="int",
                   help="Counting starts at this number.")
+parser.add_option("-d", "--dopamineDiv", dest="daDiv", default='4.0', metavar='SNc_h',
+                  help="Basic dopamine tonic activity (string that can contain an array \
+                  separated by spaces: -d \"1.0, 2.0\"). (String)")
 parser.add_option("-f", "--folder", dest="folder", default='',
                   help="Self-explained.")
 parser.add_option("-F", "--firstDynamic", dest="fD", action="store_true", default=False,
@@ -27,8 +30,12 @@ parser.add_option("-p", "--parallelDivisions", dest="pD", action="store_true", d
                   help="Parallelize by dopamine activity.")
 parser.add_option("-P", "--plotNeuralData", dest="pN", action="store_true", default=False,
                   help="Self-explained.")
+parser.add_option("-R", "--reproducibility", dest="R", action="store_true", default=False,
+                  help="Enables reproducibility by forcing the use of the experiment's number as seed.")
 parser.add_option("--storePlots", dest="sP", default=50, type="int",
                   help="Store plots every sP.")
+parser.add_option("-S","--storedWeights", dest="sW", action="store_true", default=False,
+                  help="Enables use of pre-stablished ctxstr weights.")
 parser.add_option("-t", "--times", type="int", dest="t", default=1,
                   help="Self-explained.")
 
