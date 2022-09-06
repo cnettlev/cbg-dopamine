@@ -44,6 +44,8 @@ NOISE = np.array([7])
 
 if logFile:
     additionalOptions += ' --debug'
+    if options.folder:
+        logNameRemove = ' -F'+options.folder
 
 
 if options.R: # reproducibility
@@ -91,13 +93,10 @@ def addWeights(processes):
             output.append(p+' -i '+weights)
     return output
 
-def maxmin(n,against=10):
-    return float(np.max((np.min((n,against)),against)))
-
-def runProcess(process, time=-1):
+def runProcess(process, time=''):
     if type(process) is not str: # is a list
         nProc = len(process)
-        Parallel(n_jobs=nProc)(delayed(runProcess)(p,time+ip/maxmin(nProc)) for ip, p in enumerate(process))
+        Parallel(n_jobs=nProc)(delayed(runProcess)(p,time+'.'+str(ip)) for ip, p in enumerate(process))
         return
 
     p = subprocess.Popen(process+additionalOptions,stderr=subprocess.STDOUT, stdout=subprocess.PIPE, shell=True)
@@ -108,7 +107,8 @@ def runProcess(process, time=-1):
         print "Running",process+additionalOptions
 
     if logFile:
-        fname = (options.logFolder+(process+additionalOptions).replace('/', '.')+".txt").replace(' ', '')
+        fname = options.logFolder+process.replace('python2 learning.py -d','')+additionalOptions
+        fname = fname.replace(logNameRemove, '').replace(' ', '')+".txt"
         with open(fname,'a') as logfile:
             for line in p.stdout:
                 logfile.write(line)
@@ -123,14 +123,15 @@ def runModelLearning(i):
     for j in range(forRange):
 
         time = j if parallelDivisions else i
+        divIndex = i if parallelDivisions else j
         if DA_DIV is not None:
-            DA = DA_DIV[i] if parallelDivisions else DA_DIV[j]
+            DA = DA_DIV[divIndex]
         else:
-            DA = 0.5*float(i) if parallelDivisions else 0.5*float(j)
+            DA = 0.5*float(divIndex)
 
         bProcess = 'python2 learning.py -d'+str(DA)+' -f'+str(time + baseNumber).zfill(3)
-        fisrtDiv = (parallelDivisions and (i==0)) or (not parallelDivisions and (j==0))
-        if firstDynamic and fisrtDiv:
+        # fisrtDiv = (parallelDivisions and (i==0)) or (not parallelDivisions and (j==0))
+        if firstDynamic and divIndex == 0:
             bProcess += ' --dynamicDA'
 
         # p = addNoise(bProcess)
@@ -143,7 +144,7 @@ def runModelLearning(i):
         if options.sW:
             p = addWeights(p)
 
-        runProcess(p, time)
+        runProcess(p, str(time)+'.'+str(divIndex))
 
 if parallelDivisions:
     Parallel(n_jobs=NJOBS)(delayed(runModelLearning)(i) for i in range(DIVISIONS))
