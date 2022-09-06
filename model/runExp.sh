@@ -1,6 +1,6 @@
 #!/bin/bash
 
-expName=directLoopWorkingZone/regPatterns
+expName=directLoopWorkingZone/noisyWeights
 
 HN=`hostname`
 
@@ -26,6 +26,6 @@ echo
 
 mkdir -p "$folder"
 
-python parallelLearning.py -f $folder -t 1 -S -R -a " --tonicDA-deltaOverReward 0 --regPattern --disLearning -t 600 --noisyWeights 0 "  -p -d "2.0 3.0 4.0 5.0 6.0 7.0" 
+python2 parallelLearning.py -f $folder -t 1 -S -R -a " --tonicDA-deltaOverReward 0 --regPattern --disLearning -t 600 --noisyWeights 0 " -p -l -d "2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0 " 
 # python parallelLearning.py -f $folder -t 10 -b 40 -R -a   " --tonicDA-deltaOverReward 0 -d 0.0" 
 # python parallelLearning.py -f $folder -t 50 -R -a         " --tonicDA-deltaOverReward 0" -d "1.0 9.0 10.0"

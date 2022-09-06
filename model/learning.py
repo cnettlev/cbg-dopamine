@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 # -----------------------------------------------------------------------------
 # Original Code from:
@@ -174,9 +174,12 @@ if STORE_DATA:
 
 # Compute all the trial (true) or just until a motor decision has been made
 completeTrials = True
-
 # Force selection in motor loop for every trial (discards trials with no decision)
 forceSelection = True
+
+if regPattern:
+	completeTrials = False
+	forceSelection = False
 
 # Maximum number of failed trials. Available if forceSelection is enable
 nbFailedTrials = .5*nbTrials
@@ -622,6 +625,7 @@ if options.indirectLoop:
 inputCurrents_noise = np.zeros(3*n_availableOptions)
 c1,c2,c3,m1,m2,m3 = 0,1,2,0,1,2
 SNc_dop['SNc_h'] = SNc_h_base
+wnoise = []
 
 @clock.at(500*millisecond)
 def set_trial(t):
@@ -629,7 +633,7 @@ def set_trial(t):
     # global daD, corticalLegend
 
     global cues_cog, cogDecision, cogDecisionTime, motDecision, motDecisionTime, c1, c2, m1, m2
-    global inputCurrents_noise, flag, ctxLabels
+    global inputCurrents_noise, flag, ctxLabels, wnoise
 
     if n_availableOptions == 2:
         if regPattern:
@@ -663,9 +667,14 @@ def set_trial(t):
 
     if Weights_N:
         W = W_cortex_cog_to_striatum_cog
+        pwnoise = np.copy(wnoise)
+        wnoise = np.random.normal(0,(np.diag(W.weights)-Wmin)*Weights_N)
         for w in range(n):
-            wnoise = np.random.normal(0,(W.weights[w,w]-Wmin)*Weights_N)
-            W.weights[w,w] = clip(W.weights[w,w] + wnoise, Wmin, Wmax)
+            if currentTrial > 0:
+                noise = wnoise[w] - pwnoise[w]
+            else:
+                noise = wnoise[w]
+            W.weights[w,w] = clip(W.weights[w,w] + noise, Wmin, Wmax)
 
 
 

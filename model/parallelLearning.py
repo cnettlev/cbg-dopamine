@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 from joblib import Parallel, delayed
 import multiprocessing
 import subprocess
@@ -21,7 +21,7 @@ DIVISIONS = DA_DIV.shape[0]
 TIMES = options.t
 baseNumber = options.bN
 NJOBS = options.nJ
-WEIGHTS = np.array([["0.54 0.525 0.49 0.475"],["0.53 0.51 0.49 0.47"]])
+WEIGHTS = np.array([["0.60 0.566 0.533 0.50"], ["0.55 0.525 0.50 0.475"]]) # ["0.54 0.525 0.49 0.475"],
 
 cLTD = None 
 
@@ -111,7 +111,6 @@ def runProcess(process, time=-1):
         fname = (options.logFolder+(process+additionalOptions).replace('/', '.')+".txt").replace(' ', '')
         with open(fname,'a') as logfile:
             for line in p.stdout:
-                # sys.stdout.write(line)
                 logfile.write(line)
     p.wait()
     if time>=0:
@@ -129,7 +128,7 @@ def runModelLearning(i):
         else:
             DA = 0.5*float(i) if parallelDivisions else 0.5*float(j)
 
-        bProcess = 'python learning.py -d'+str(DA)+' -f'+str(time + baseNumber).zfill(3)
+        bProcess = 'python2 learning.py -d'+str(DA)+' -f'+str(time + baseNumber).zfill(3)
         fisrtDiv = (parallelDivisions and (i==0)) or (not parallelDivisions and (j==0))
         if firstDynamic and fisrtDiv:
             bProcess += ' --dynamicDA'
