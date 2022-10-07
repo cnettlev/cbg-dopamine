@@ -1,6 +1,11 @@
 #!/usr/bin/python3
 import os
 
+
+def printFunc(f):
+    print(f.__code__.co_varnames)
+    print(f.__defaults__)
+
 def checkFolder(dir):
     if not os.path.isdir(dir):
         os.makedirs(dir)
@@ -10,12 +15,12 @@ class askFlag():
         self.flag = default[0].lower() if default else default
         self.msg = msg
 
-    def askOnce(self, msg, default=True, doExit=True, always=False):
-        print(msg+" [y/Y]")
+    def askOnce(self, msg, default=True, doExit=True, persistence=False):
+        print(msg+" [y/Y (yes) "+("a/A (all) n/N (none) " if persistence else '')+"nothing (" + str(default)+")  otherwise no]")
         choice = input().lower()
-        if always and choice != '' and (choice == 'none'):
+        if persistence and choice != '' and (choice[0] == 'n'):
             return 'n'
-        if always and choice != '' and (choice[0] == 'a'):
+        if persistence and choice != '' and (choice[0] == 'a'):
             return 'a'
         if choice == '':
             return default
@@ -29,7 +34,7 @@ class askFlag():
         if not msg:
             msg = self.msg
         if (self.flag != 'a' and self.flag !='n'):
-            self.flag = self.askOnce(msg,doExit=False, always=True)
+            self.flag = self.askOnce(msg,doExit=False, persistence=True)
         # else:
         #     return self.flag
 

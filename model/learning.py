@@ -145,7 +145,7 @@ DA_buffIndex = 0
 # Learning parameters
 decision_threshold = 20 if options.indirectLoop else 30
 alpha_c     = 0.2  # 0.05
-Wmin, Wmax = 0.45, 0.55
+Wmin, Wmax = 0.5, 0.6#0.45, 0.55
 #Wmin, Wmax = 0.4, 0.6
 
 # Reward extension [ms]
@@ -175,11 +175,11 @@ if STORE_DATA:
 # Compute all the trial (true) or just until a motor decision has been made
 completeTrials = True
 # Force selection in motor loop for every trial (discards trials with no decision)
-forceSelection = True
+forceSelection = False # True
 
-if regPattern:
-	completeTrials = False
-	forceSelection = False
+#if regPattern:
+#	completeTrials = False
+#	forceSelection = False
 
 # Maximum number of failed trials. Available if forceSelection is enable
 nbFailedTrials = .5*nbTrials
@@ -188,7 +188,7 @@ nbContFailedTrials = 20
 
 # Use a regular pattern for the cues selection
 # regPattern = False
-nbTrialsPerPattern = 100
+nbTrialsPerPattern = 50
 if options.GM2008:
     pattern = np.array([0,1,2])
     nPatterns = len(pattern)
@@ -663,7 +663,7 @@ def set_trial(t):
         ctxLabels[m1+n] += ' *'
         ctxLabels[c2] += ' ^'
         ctxLabels[m2+n] += ' ^'
-        addLegend(axctx,lines_ctx,ctxLabels,loc='upper left')
+        addLegend(axctx,lines_ctx,ctxLabels,loc='upper right')
 
     if Weights_N:
         W = W_cortex_cog_to_striatum_cog
@@ -681,7 +681,7 @@ def set_trial(t):
 @before(clock.tick)
 def computeSoftInput(t):
     if motDecisionTime < 3500:
-        inputsOffAt =  motDecisionTime/1000+delayReward+0.2
+        inputsOffAt =  motDecisionTime/1000+reward_ext+0.2#delayReward+0.2
     else:
         inputsOffAt = 3.2
     v = sigmoid(t,0,cues_amplitude,.725,.042) - sigmoid(t,0,cues_amplitude,inputsOffAt,.084)
@@ -719,17 +719,17 @@ def fillDopamineBuffer(t):
 
 @before(clock.tick)
 def deliverReward(t):
-    if motDecisionTime/1000 + delayReward < t:
-        if t < motDecisionTime/1000 + reward_ext and SNc_dop['Irew'] == 0:
+    if (motDecisionTime/1000 + delayReward) < t:
+        if t < (motDecisionTime/1000 + reward_ext) and SNc_dop['Irew'] == 0:
             SNc_dop['Irew'] = pError * alpha_Rew_DA
-        elif t > motDecisionTime/1000 + reward_ext:
+        elif t >= (motDecisionTime/1000 + reward_ext):
             SNc_dop['Irew'] = 0
 
     if cogReward and cogDecisionTime/1000 < t:
         if t < (cogDecisionTime/1000 + reward_ext - delayReward) and SNc_dop['Ie_rew'] == 0:
             # print 'Value for current:',cog_cues_value[np.argmax(Cortex_cog['V'])],float(cog_cues_value[np.argmax(Cortex_cog['V'])]),float(cog_cues_value[np.argmax(Cortex_cog['V'])])*alpha_Rew_DA
             SNc_dop['Ie_rew'] = float(cog_cues_value[np.argmax(Cortex_cog['V'])]) * alpha_Rew_DA
-        elif t > (cogDecisionTime/1000 + reward_ext - delayReward):
+        elif t >= (cogDecisionTime/1000 + reward_ext - delayReward):
             SNc_dop['Ie_rew'] = 0
 
 # @after(clock.tick)
@@ -1022,7 +1022,7 @@ def register(t):
 
 if neuralPlot:
     cogMarker = motMarker = movMarker = []
-    plotSteps = 300*millisecond
+    plotSteps = 1*millisecond
 
     ### Neural activity
 
@@ -1053,7 +1053,7 @@ if neuralPlot:
     neuralData_ctx_ass = np.full((xLen,n*n),None,dtype=float)
     lines_ctx_ass = axctxass.plot(xBySteps,neuralData_ctx_ass, alpha=0.7)
 
-    axstr.set_ylim(-2,18)
+    axstr.set_ylim(-2,23)
     axstr.set_title('Striatal (direct) activity', fontsize=10)
     neuralData_str = np.full((xLen,2*n),None,dtype=float)
     lines_str = axstr.plot(xBySteps,neuralData_str, alpha=0.7)
@@ -1079,17 +1079,17 @@ if neuralPlot:
     neuralData_snc = np.full((xLen,2),None,dtype=float)
     lines_snc = axsnc.plot(xBySteps,neuralData_snc, alpha=0.7)
 
-    axgpi.set_ylim(-2,100)
+    axgpi.set_ylim(40,130)
     axgpi.set_title('GPi activity', fontsize=10)
     neuralData_gpi = np.full((xLen,2*n),None,dtype=float)
     lines_gpi = axgpi.plot(xBySteps,neuralData_gpi, alpha=0.7)
 
-    axstn.set_ylim(-2,40)
+    axstn.set_ylim(10,80)
     axstn.set_title('STN activity', fontsize=10)
     neuralData_stn = np.full((xLen,2*n),None,dtype=float)
     lines_stn = axstn.plot(xBySteps,neuralData_stn, alpha=0.7)
 
-    axth.set_ylim(-2,60)
+    axth.set_ylim(-2,45)
     axth.set_title('Thalamus activity', fontsize=10)
     neuralData_th = np.full((xLen,2*n),None,dtype=float)
     lines_th = axth.plot(xBySteps,neuralData_th, alpha=0.7)
@@ -1245,7 +1245,7 @@ if neuralPlot:
                 neuralData_v[currentTrial][n+1] = float((n-1)-nchoice)/float(n-1)
             for i in np.arange(2)+n:
                 lines_v[i].set_ydata(neuralData_v[:,i])
-        if len(movMarker) == 0 and motDecisionTime/1000 + delayReward < t:
+        if len(movMarker) == 0 and (motDecisionTime/1000 + delayReward) < t:
             reloadLabel = True
             if R[-1]:
                 movMarker = axctx.plot(t,40,marker='.',alpha=0.4,markersize=20,color='g',linestyle='None')
@@ -1259,7 +1259,7 @@ if neuralPlot:
                 (len(movMarker) != 0) * movMarker, 
                 ctxLabels + (len(cogMarker) != 0)*['C-choise'] +
                 (len(motMarker) != 0) * ['M-choise'] +
-                (len(movMarker) != 0) * ['Reward'], loc='upper left')
+                (len(movMarker) != 0) * ['Reward'], loc='upper right')
 
             if len(motMarker) != 0:
                 actualizePerformance()
@@ -1275,7 +1275,7 @@ if neuralPlot:
 
     @clock.at(500*millisecond)
     def addCuesLines(t):
-        axctx.plot([t, t], axctx.get_ylim(),'gray',ls='--',alpha=.3,lw=3)
+        axctx.plot([t, t], axctx.get_ylim(),'gray',ls='--',alpha=.2,lw=2)
 
     @clock.at(dt)
     def plotTrial_data(t):

@@ -21,7 +21,7 @@ DIVISIONS = DA_DIV.shape[0]
 TIMES = options.t
 baseNumber = options.bN
 NJOBS = options.nJ
-WEIGHTS = np.array([["0.60 0.566 0.533 0.50"], ["0.55 0.525 0.50 0.475"]]) # ["0.54 0.525 0.49 0.475"],
+WEIGHTS = np.array([["0.60 0.566 0.533 0.50"]]) # ["0.54 0.525 0.49 0.475"],["0.60 0.566 0.533 0.50"], 
 
 cLTD = None 
 
