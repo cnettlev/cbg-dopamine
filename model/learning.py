@@ -181,25 +181,29 @@ forceSelection = False # True
 #	completeTrials = False
 #	forceSelection = False
 
-# Maximum number of failed trials. Available if forceSelection is enable
-nbFailedTrials = .5*nbTrials
-# Maximum number of continuous failed trials
-nbContFailedTrials = 20
-
 # Use a regular pattern for the cues selection
 # regPattern = False
-nbTrialsPerPattern = 50
+nbTrialsPerPattern = options.trialsPerPattern
 if options.GM2008:
     pattern = np.array([0,1,2])
     nPatterns = len(pattern)
     n_availableOptions = 3
 else:
     pattern = np.array([[0,1],[0,2],[0,3],[1,2],[1,3],[2,3]])
+    if options.singlePattern >= 0 and options.singlePattern < len(pattern):
+        pattern = np.array([pattern[options.singlePattern]])
     nPatterns = len(pattern)
     n_availableOptions = 2
 
+if regPattern:
+    nbTrials = nbTrialsPerPattern*nPatterns
 probChoiceBuffSize = 10
 probChoice = 0.5*np.ones((nPatterns,probChoiceBuffSize))
+
+# Maximum number of failed trials. Available if forceSelection is enable
+nbFailedTrials = .5*nbTrials
+# Maximum number of continuous failed trials
+nbContFailedTrials = 20
 
 # Enable debug messages
 # DA = 1.0

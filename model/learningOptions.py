@@ -50,6 +50,10 @@ parser.add_option("-N", "--noiseLevel", dest="noise", default=.5, type="float",
                   help="Noise level in the substantia nigra. (float)", metavar="sncNoise")
 parser.add_option("-p", "--regPattern", dest="useRegularPattern", action="store_true", default=False,
                   help="Sets the presentation of a specific pair of cues in order to produce a controlled number of presentations for each combination.")
+parser.add_option("--pattern", dest="singlePattern", default=-1, type="int",
+                  help="Index of a specific pattern to be used during the hole experiment's reproduction.")
+parser.add_option("--pattern-trials", dest="trialsPerPattern", default=50, type="int", metavar="TPP",
+                  help="If regular patterns are used, the number of trials will be TPP times the number of patterns.")
 parser.add_option("-P", "--activityPlots", dest="plotting", action="store_true", default=False,
                   help="Activates the presentation of plots with neural activity at every trial.")
 parser.add_option("--pAdvantage", dest="dynamicDAoverA", action="store_true", default=False,
@@ -121,7 +125,7 @@ alpha_LTD = options.LTD
 constantLTD = options.cLTD
 oneStepConstantLTD = options.oScLTD
 applyInMotorLoop = options.applyInMotorLoop
-regPattern = options.useRegularPattern
+regPattern = options.useRegularPattern or (options.singlePattern >= 0)
 neuralPlot = options.plotting or (flashPlots>=0)
 if neuralPlot and flashPlots == -1:
       flashPlots = 0
@@ -170,6 +174,8 @@ if randomInit >= 0:
 file_base += 'dDA_'+str(options.DAbySuccess)+'_'
 file_base += 'X'+str(aux_X)+'_'
 file_base += 'Y'+str(aux_Y)+'_'
+if options.singlePattern >= 0:
+  file_base += 'sP'+str(options.singlePattern)+'_'
 if len(cogInitialWeights):
   file_base += 'w'+'_'.join([str(c) for c in np.diag(cogInitialWeights)])+'_'
 
