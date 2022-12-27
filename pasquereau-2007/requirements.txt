@@ -1,4 +1,4 @@
-setuptools==40.3.0
+setuptools==65.5.1
 click==7.1.1
 Flask==1.1.1
 gunicorn==19.10.0
