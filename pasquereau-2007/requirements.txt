@@ -6,7 +6,7 @@ itsdangerous==1.1.0
 Jinja2==2.11.3
 MarkupSafe==1.1.1
 ordereddict==1.1
-Werkzeug==1.0.0
+Werkzeug==2.2.3
 pygdrive3==0.6.0
 google-api-python-client==1.8.0
 oauth2client==4.1.3
