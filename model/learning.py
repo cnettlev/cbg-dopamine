@@ -77,7 +77,7 @@ import itertools
 # Default trial duration (max duration)
 duration = 3.5*second
 afterSelectionTime = 1.5*second
-stopAfterSelection = True
+stopAfterSelection = False # True
 
 # Default Time resolution
 dt = 1.0*millisecond
@@ -1133,7 +1133,7 @@ if neuralPlot:
     neuralData_w = np.full((xLen,n),None,dtype=float)
     lines_w = axw.plot(xByTrials,neuralData_w, alpha=0.7)
 
-    axsnct.set_ylim(0,20)
+    axsnct.set_ylim(0,12)
     axsnct.set_title('SNc tonic activity', fontsize=10)
     neuralData_snct = np.full((xLen,1),None,dtype=float)
     lines_snct = axsnct.plot(xByTrials,neuralData_snct, alpha=0.7,color='magenta',linewidth=3)
@@ -1143,7 +1143,7 @@ if neuralPlot:
     neuralData_prob = np.full((xLen,nPatterns),None,dtype=float)
     lines_prob = axprob.plot(xByTrials,neuralData_prob, alpha=0.7, linewidth=3)
 
-    axentr.set_ylim(0,1)
+    axentr.set_ylim(0,5)
     axentr.set_title('Choice entropy', fontsize=10)
     neuralData_entr = np.full((xLen,1),None,dtype=float)
     lines_entr = axentr.plot(xByTrials,neuralData_entr, alpha=0.7)
@@ -1279,11 +1279,13 @@ if neuralPlot:
 
     @clock.at(500*millisecond)
     def addCuesLines(t):
-        axctx.plot([t, t], axctx.get_ylim(),'gray',ls='--',alpha=.2,lw=2)
+        for ax in axd:
+            ax.plot([t, t], ax.get_ylim(),'gray',ls='--',alpha=.2,lw=2)
+        # axctx.plot([t, t], axctx.get_ylim(),'gray',ls='--',alpha=.2,lw=2)
 
     @clock.at(dt)
     def plotTrial_data(t):
-        neuralData_snct[currentTrial]  = SNc_dop['SNc_h']
+        neuralData_snct[currentTrial]  = -SNc_dop['SNc_h']
         neuralData_w[currentTrial]     = np.diag(W_cortex_cog_to_striatum_cog._weights)
         neuralData_v[currentTrial][:n] = cog_cues_value
         neuralData_prob[currentTrial]  = np.nanmean(probChoice,axis=1)

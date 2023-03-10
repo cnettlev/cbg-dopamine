@@ -194,7 +194,7 @@ if folder:
 STORE_FAILED = False
 FAILED_FILE = folder+'failed_'+str(DA)
 
-if STORE_DATA or STORE_FAILED:
+if STORE_DATA or STORE_FAILED or (neuralPlot and storePlotsEvery):
     
     if 'corcovado' == gethostname():
         if not folder:
